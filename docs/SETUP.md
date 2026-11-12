@@ -128,15 +128,11 @@ De bestaande credential-helper leest een PAT uit:
 Regel 1 moet een **geldige** GitHub-token zijn (klassiek of fine-grained met
 `repo`-rechten). Vervang hem als hij verlopen is:
 
+Open het bestand met een editor, vervang **alleen regel 1** door de nieuwe
+token en laat de andere regels staan:
+
 ```bash
-# voorbeeld: vervang regel 1, laat andere regels staan
-python3 - <<'PY'
-from pathlib import Path
-p = Path.home() / "Documents/deepseek-harness/pat/pat.txt"
-lines = p.read_text().splitlines()
-lines[0] = "ghp_VERVANG_MIJ"
-p.write_text("\n".join(lines) + "\n")
-PY
+nano /home/yoda/Documents/deepseek-harness/pat/pat.txt
 ```
 
 Of zet tijdelijk een token in je shell:
