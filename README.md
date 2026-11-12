@@ -141,6 +141,7 @@ volgende stappen.
 | [docs/SCALING.md](docs/SCALING.md) | Van één VPS naar schaalbare architectuur |
 | [docs/FAQ.md](docs/FAQ.md) | Bezwaren, tijdsbudget, AI-gebruik, falen |
 | [START-HIER.md](START-HIER.md) | De eerste zeven dagen, dag voor dag |
+| [docs/BASELINE.md](docs/BASELINE.md) | Nulmeting: waar sta je nu? |
 
 ## Status
 

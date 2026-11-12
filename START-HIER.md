@@ -10,6 +10,11 @@ Dit is de meest concrete route. Als je niets anders leest, lees dit en begin.
 - [ ] Een API-key of lokale Ollama; een uitgavenlimiet staat aan.
 - [ ] Een GitHub-account en een geldige PAT (zie [SETUP.md](docs/SETUP.md)).
 
+## Dag 0 — Nulmeting (30 min, optioneel maar aanbevolen)
+
+Doe de [nulmeting](docs/BASELINE.md) zonder boek of AI. Noteer je score; die
+kalibreert je tempo en je verwachtingen. Je hoeft niets te installeren.
+
 ## Dag 1 — Omgeving en eerste agent (60 min)
 
 **Lezen (15 min):** PydanticAI p. 4-25 (h.1-2), Claude Code p. 8-47 (h.1-3).
