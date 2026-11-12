@@ -1,0 +1,554 @@
+phase: 4
+title: "Fase 4 - Productie: security, evaluatie, schaal en betrouwbaarheid"
+weeks:
+  - week: 17
+    phase: 4
+    title: "Security en threat modeling"
+    outcome: "Je maakt dreigingen expliciet met STRIDE en de OWASP LLM Top 10, en je bewijst met een injectiesuite en een secret scan dat de belangrijkste maatregelen werken."
+    reading:
+      - book: "PydanticAI: Building Production-Grade AI Agents"
+        ref: pydanticai
+        chapters: "10"
+        pages: "96-104"
+      - book: "Mastering Claude Code"
+        ref: claudecode
+        chapters: "11"
+        pages: "135-141"
+      - book: "CrewAI in Action"
+        ref: crewai
+        chapters: "9"
+        pages: "101-109"
+    build:
+      goal: "Bouw een threat model en een uitvoerbare securitysuite voor een agent met MCP-tools: STRIDE per component, een mapping op de OWASP LLM Top 10, een prompt-injectiesuite, een tool-sandbox met least privilege en een secret scan in CI."
+      deliverable: "Repo agent-sec-01 met threat-model.md, tests/security met injectiecases, sandboxconfiguratie, secret scan in CI en een red-teamrapport met bevindingen en maatregelen."
+      steps:
+        - "Modelleer de componenten en trust boundaries: gebruiker, agent, MCP-servers, tools, secret store en logs; loop ze een voor een langs STRIDE."
+        - "Map elke dreiging op de OWASP LLM Top 10 en noteer per dreiging een maatregel, een eigenaar en het testbewijs."
+        - "Schrijf minstens tien injectiecases: directe injectie, injectie via tool-output of README, rol-overname en exfiltratie via een URL."
+        - "Beperk tools tot least privilege: verberg gevoelige tools per rol, geef alleen noodzakelijke rechten en houd secrets buiten context en logs."
+        - "Zet een secret scan op met grep-patronen en een pre-commit hook, plus een container-sandbox zonder productietoegang; leg de uitkomsten vast in het red-teamrapport."
+      done_when:
+        - "De injectiesuite faalt op de onbeschermde variant en slaagt op de beschermde variant."
+        - "De secret scan vindt geen key, token of connection string in de repo of in de logoutput."
+        - "Het threat model noemt per STRIDE-categorie minstens een reele aanval met een geteste maatregel."
+    challenge:
+      brief: "Lever een threat model plus een securitysuite die aantoont dat injectiepogingen en secret-lekken worden tegengehouden of gedetecteerd."
+      verify: "python -m pytest -q tests/security"
+      acceptance:
+        - "Het threat model dekt STRIDE en de OWASP LLM Top 10 met reele aanvalspaden."
+        - "Minstens tien injectiecases draaien geautomatiseerd en de beschermde variant slaagt."
+        - "De secret scan is onderdeel van CI en de tool-sandbox is aantoonbaar actief."
+      evidence:
+        - "commit-sha"
+        - "testrapport van de securitysuite"
+        - "red-teamrapport met bevindingen en maatregelen"
+    references:
+      - title: "PydanticAI documentatie"
+        url: "https://ai.pydantic.dev/"
+      - title: "OWASP Top 10 voor LLM-applicaties"
+        url: "https://genai.owasp.org/llm-top-10/"
+    exam:
+      pass_score: 85
+      minutes: 20
+      questions:
+        - id: w17q1
+          type: mcq
+          prompt: "Waarom is een input guard de sterkste laag tegen prompt-injectie?"
+          options:
+            A: "Omdat hij achteraf schadelijke output uit de response filtert."
+            B: "Omdat hij de aanval blokkeert voordat er een modelcall plaatsvindt."
+            C: "Omdat hij het model dwingt tot een strikter outputschema."
+            D: "Omdat hij de kosten van elke run verlaagt."
+          answer: B
+          explanation: "Een guard die False teruggeeft, blokkeert de input voordat het model wordt aangeroepen; de aanval bereikt het model dus niet. Outputfilters en schema's zijn aanvullend, geen vervanging."
+          source: "PydanticAI h.10, p.97-98 en p.103"
+        - id: w17q2
+          type: mcq
+          prompt: "Wat gebeurt er als een tool-permissionfunctie via prepare None teruggeeft voor delete_user?"
+          options:
+            A: "De tool wordt verborgen voor het model en kan niet worden aangeroepen."
+            B: "De tool wordt uitgevoerd, maar het resultaat wordt genegeerd."
+            C: "De agent vraagt de gebruiker om toestemming."
+            D: "De tool geeft automatisch een fout terug aan het model."
+          answer: A
+          explanation: "prepare kan een ToolDefinition teruggeven of None; None betekent dat de tool niet beschikbaar is in deze run, wat een rolgebaseerde whitelist met least privilege mogelijk maakt."
+          source: "PydanticAI h.10, p.100"
+        - id: w17q3
+          type: mcq
+          prompt: "CVE-2025-59536 in Claude Code kwam voort uit hooks in repositoryconfiguratie. Welke maatregel had dit het meest direct voorkomen?"
+          options:
+            A: "Een langere system prompt met een waarschuwing over onbetrouwbare repositories."
+            B: "Hooks niet uitvoeren voordat de trustbeslissing valt, en de sessie in een sandbox zonder productietoegang draaien."
+            C: "Meer retries bij het lezen van configuratiebestanden."
+            D: "Een groter model met een ruimere context window."
+          answer: B
+          explanation: "De configuratiebestanden werden als uitvoerbare logica behandeld en de hook liep voor de trustprompt. De structurele fix is de trust boundary herstellen: eerst vertrouwen, dan uitvoeren, en uitvoering beperken met een sandbox."
+          source: "Mastering Claude Code h.11, p.135-140"
+        - id: w17q4
+          type: mcq
+          prompt: "Een CrewAI-taakguardrail geeft False terug met de melding dat bronvermelding ontbreekt, en max_retries staat op 3. Wat gebeurt er?"
+          options:
+            A: "De taak faalt direct zonder retry."
+            B: "De output wordt alsnog geaccepteerd met een waarschuwing."
+            C: "De agent krijgt de melding als feedback en de taak wordt opnieuw geprobeerd, tot maximaal drie keer."
+            D: "De guardrail wordt overgeslagen en de volgende taak start."
+          answer: C
+          explanation: "Een guardrail retourneert (bool, melding); bij False wordt de melding als feedback gebruikt voor een retry, begrensd door max_retries, en daarna volgt een fout."
+          source: "CrewAI h.9, p.102-103 en p.108"
+        - id: w17q5
+          type: mcq
+          prompt: "Waarom verkleint een strikt outputschema het aanvalsoppervlak, maar vervangt het geen guardrails?"
+          options:
+            A: "Omdat een schema alleen werkt bij streaming responses."
+            B: "Omdat een schema de modelcall goedkoper maakt en daarmee veiliger."
+            C: "Omdat een schema prompt-injectie in de input voorkomt."
+            D: "Omdat een schema de output beperkt tot bekende velden en waarden, terwijl de inhoud binnen die velden nog steeds kwaadaardig kan zijn."
+          answer: D
+          explanation: "Het schema beperkt de vorm en de ruimte voor exfiltratie, maar een tekstveld kan nog steeds schadelijke of gelekte inhoud bevatten; input- en outputguards blijven nodig."
+          source: "PydanticAI h.10, p.99-100 en p.103"
+        - id: w17q6
+          type: open
+          prompt: "Je agent gebruikt drie MCP-tools: een issue-tracker, een documentzoeker en een mailverzender. Maak een threat model met vier reele aanvalspaden en per pad een maatregel die je kunt testen."
+          key_points:
+            - "Indirecte prompt-injectie via tool-output, bijvoorbeeld een vergiftigde README of een kwaadaardig issuecommentaar."
+            - "Overmatige rechten van een tool, zoals een mailverzender die zonder bevestiging externe ontvangers aanschrijft."
+            - "Exfiltratie van secrets of context via een URL, een base-URL of een gelogde prompt."
+            - "Configuratie en MCP-servers als uitvoerbare logica, met een gemanipuleerde server of hook."
+            - "Verkeerde roltoewijzing, waardoor een readonly-gebruiker een schrijvende tool kan aanroepen."
+          model_answer: "Ik modelleer eerst de trust boundaries tussen gebruiker, agent, MCP-servers en tools. Pad een is indirecte injectie via tool-output: een vergiftigde README bevat instructies; maatregel is input/output-scheiding, een input guard en een test met een gepoisonde documentbron. Pad twee is overmatige rechten: de mailverzender mag alleen naar goedgekeurde domeinen sturen en vraagt bevestiging; maatregel is least privilege plus een prepare-filter per rol, getest met een readonly-gebruiker. Pad drie is exfiltratie via een URL of base-URL: maatregel is een netwerkallowlist in de sandbox en een secret scan, getest met een injectie die een token in een link probeert te zetten. Pad vier is configuratie als uitvoerbare logica: maatregel is een sandbox zonder productietoegang, versiepin en een audit-grep op hooks en base-URLs. Elk pad krijgt een STRIDE-label, een OWASP-mapping en een geautomatiseerde test."
+          source: "PydanticAI h.10; Mastering Claude Code h.11; CrewAI h.9"
+    cards:
+      - id: w17c1
+        front: "Waarom is een input guard sterker dan een outputfilter?"
+        back: "De guard blokkeert de aanval voordat het model wordt aangeroepen en er kosten of acties volgen; een outputfilter grijpt pas achteraf in."
+        source: "PydanticAI h.10, p.98 en p.103"
+      - id: w17c2
+        front: "Wat doet None in een prepare-functie voor een tool?"
+        back: "De tool wordt voor deze run verborgen voor het model; zo werkt een rolgebaseerde whitelist met least privilege."
+        source: "PydanticAI h.10, p.100"
+      - id: w17c3
+        front: "Welke les komt uit CVE-2025-59536 in Claude Code?"
+        back: "Repositoryconfiguratie en hooks zijn uitvoerbare logica; ze mogen niet voor een trustbeslissing draaien en horen in een sandbox met beperkte rechten."
+        source: "Mastering Claude Code h.11, p.135-136"
+      - id: w17c4
+        front: "Hoe reageert een CrewAI-taak op een falende guardrail?"
+        back: "De guardrail geeft (False, melding) terug; de melding gaat als feedback naar de agent en de taak wordt opnieuw geprobeerd tot max_retries, daarna volgt een fout."
+        source: "CrewAI h.9, p.102-103 en p.108"
+      - id: w17c5
+        front: "Noem de vier lagen uit de layered safety strategy van CrewAI."
+        back: "Inputvalidatie, outputguardrails, kwaliteitscheck met een LLM en een safety filter voor moderatie en PII."
+        source: "CrewAI h.9, p.108-109"
+
+  - week: 18
+    phase: 4
+    title: "Evaluatie en continuous improvement"
+    outcome: "Je meet agentkwaliteit met geversioneerde datasets en een geijkte judge, en je koppelt releasebeslissingen aan drempels en een regressiedashboard."
+    reading:
+      - book: "PydanticAI: Building Production-Grade AI Agents"
+        ref: pydanticai
+        chapters: "15"
+        pages: "148-161"
+      - book: "Programming with DSPy"
+        ref: dspy
+        chapters: "18"
+        pages: "131-149"
+      - book: "Building Production-Ready AI Agents with LlamaIndex"
+        ref: llamaindex
+        chapters: "11"
+        pages: "113-122"
+    build:
+      goal: "Bouw een eval-harness die elke prompt- of modelwijziging meet: geversioneerde datasets, een judge die tegen menselijke labels is geijkt, een regressiedashboard en expliciete releasecriteria."
+      deliverable: "Repo agent-eval-01 met evals/datasets inclusief versie en herkomst, judge-calibratierapport met agreement, regressiedashboard per run en releasecriteria.md."
+      steps:
+        - "Verzamel minimaal vijftig cases uit productie en support, met categorie, herkomst en een vaste datasetversie in git."
+        - "Kies per metric een evaluator: exact match voor deterministische extractie, een judge of semantische similariteit voor vrije tekst."
+        - "Laat twee beoordelaars dertig cases labelen en meet de agreement van de judge met die labels; herzie de rubric bij lage agreement."
+        - "Draai de suite in CI op elke pull request en sla per run de score, datasetversie, promptversie en het model op."
+        - "Bouw een regressiedashboard met de trend per metric en leg drempels en releasecriteria vast."
+      done_when:
+        - "Elke eval-run is herleidbaar naar datasetversie, promptversie en model."
+        - "De judge is geijkt op menselijke labels en de agreement is gerapporteerd."
+        - "Een opzettelijke promptverslechtering wordt door de gate tegengehouden."
+    challenge:
+      brief: "Bewijs dat je kwaliteit kunt meten en bewaken: een geijkte judge, een groene regressierun en een releasebesluit dat op drempels is gebaseerd."
+      verify: "python scripts/eval_gate.py --dataset evals/datasets/regression-v3.jsonl"
+      acceptance:
+        - "De judge-agreement met menselijke labels is gemeten en gedocumenteerd."
+        - "Het regressierapport noemt per metric een drempel en het genomen besluit."
+        - "Een bewust verslechterde prompt faalt de gate."
+      evidence:
+        - "commit-sha"
+        - "eval-rapport met drempels"
+        - "judge-calibratierapport"
+    references:
+      - title: "Pydantic Evals documentatie"
+        url: "https://ai.pydantic.dev/evals/"
+      - title: "DSPy evaluatie"
+        url: "https://dspy.ai/learn/evaluation/overview/"
+    exam:
+      pass_score: 85
+      minutes: 20
+      questions:
+        - id: w18q1
+          type: mcq
+          prompt: "Je judge scoort acht procentpunt hoger na een promptwijziging. Wat doe je eerst voordat je dit als verbetering boekt?"
+          options:
+            A: "De wijziging direct naar productie brengen."
+            B: "De judge vervangen door exact match."
+            C: "De dataset uitbreiden met de nieuwe outputs."
+            D: "Dezelfde judge op een set met menselijke labels draaien en de agreement opnieuw meten."
+          answer: D
+          explanation: "Een judge is zelf een model en kan driften of meebewegen met de prompt; zonder ijkpunt op menselijke labels meet je niet of de kwaliteit echt steeg."
+          source: "PydanticAI h.15, p.152-153 en p.159"
+        - id: w18q2
+          type: mcq
+          prompt: "Voor welke taak is exact match de juiste evaluator?"
+          options:
+            A: "Een vrije supporttekst die per run anders is geformuleerd."
+            B: "Een judge die de toon van een antwoord beoordeelt."
+            C: "Een classificatie met een vaste enum die deterministisch hoort te zijn."
+            D: "Een gesprek met meerdere beurten."
+          answer: C
+          explanation: "Exact match past bij deterministische, gesloten output; voor conversationele of open tekst is hij te streng en gebruik je semantische similariteit of een judge."
+          source: "PydanticAI h.15, p.151-152 en p.161"
+        - id: w18q3
+          type: mcq
+          prompt: "Wat staat de DSPy-regressiecheck assert new_score >= baseline_score * 0.95 toe?"
+          options:
+            A: "Een relatieve daling tot vijf procent ten opzichte van de baseline; daarboven faalt de build."
+            B: "Elke daling is toegestaan zolang de tests groen zijn."
+            C: "Een stijging van minimaal vijf procent."
+            D: "Alleen een gelijke score, dus geen enkele daling."
+          answer: A
+          explanation: "De factor 0.95 is een tolerantie van vijf procent relatieve daling; het is een bewuste marge, geen vrijbrief, en de vaste regressieset mag niet op de uitkomst worden aangepast."
+          source: "DSPy h.18, p.134"
+        - id: w18q4
+          type: mcq
+          prompt: "Een RAG-run scoort faithfulness 0.62 en context recall 0.88. Waar wijst dit vooral op?"
+          options:
+            A: "De retriever mist de benodigde documenten."
+            B: "Het antwoord is onvoldoende gegrond in de opgehaalde context."
+            C: "De context window is te klein."
+            D: "De judge is te streng en moet worden vervangen."
+          answer: B
+          explanation: "Hoge context recall betekent dat de benodigde informatie is opgehaald; lage faithfulness wijst op claims die niet door die context worden gedekt, dus op grounding of hallucinatie."
+          source: "LlamaIndex h.11, p.113-116"
+        - id: w18q5
+          type: mcq
+          prompt: "Wat bewijst een groene eval-gate met pass rate 0.90 op een vaste set van veertig cases?"
+          options:
+            A: "Dat de agent in productie negentig procent van de gebruikers tevreden stelt."
+            B: "Dat de judge geen fouten meer maakt."
+            C: "Dat de prompt niet meer hoeft te worden geversioneerd."
+            D: "Dat de vaste set boven de drempel scoort, maar niet dat nieuwe of zeldzame scenario's goed gaan."
+          answer: D
+          explanation: "De gate meet alleen de gekozen dataset en metric; dekkingsgraad, productiesamples en judge-kwaliteit blijven aparte bewijsvragen."
+          source: "PydanticAI h.15, p.157-159"
+        - id: w18q6
+          type: open
+          prompt: "Ontwerp releasecriteria voor een agentwijziging. Benoem de datasets, de metrics met drempels, de judge-ijking, het productiebewijs en het terugrolcriterium."
+          key_points:
+            - "Een geversioneerde dataset met een vaste regressieset en een aanvulling uit productie, herleidbaar per run."
+            - "Per metric een expliciete drempel, bijvoorbeeld faithfulness, taaksucces en foutpercentage, met een meetbare marge."
+            - "Judge-ijking tegen menselijke labels met gerapporteerde agreement en een vaste rubric."
+            - "Productiebewijs via een canary of een wekelijkse steekproef met menselijk goedgekeurde antwoorden."
+            - "Een expliciet terugrolcriterium dat vooraf is vastgelegd, niet pas tijdens het incident."
+          model_answer: "Ik leg eerst de dataset vast: een vaste regressieset die nooit op de uitkomst wordt aangepast, aangevuld met een geversioneerde steekproef uit productie. Per metric kies ik een evaluator en een drempel: exact match voor deterministische velden, een judge voor vrije tekst, en RAG-metrics zoals faithfulness en context recall voor retrieval. De judge ijk ik op dertig menselijk gelabelde cases en ik rapporteer de agreement; bij een lage agreement herzie ik de rubric voordat ik de score gebruik. De gate draait in CI en blokkeert een pull request onder de drempel. Na deployment vergelijk ik een canary of wekelijkse steekproef met de baseline en ik rol terug bij een daling onder de afgesproken grens of bij een stijging van het foutpercentage."
+          source: "PydanticAI h.15; DSPy h.18; LlamaIndex h.11"
+    cards:
+      - id: w18c1
+        front: "Uit welke vier abstracties bestaat Pydantic Evals?"
+        back: "Dataset, Case, Evaluator en Experiment; samen leveren ze een rapport met scores en statistieken."
+        source: "PydanticAI h.15, p.148"
+      - id: w18c2
+        front: "Wanneer is exact match de juiste evaluator?"
+        back: "Bij deterministische, gesloten output zoals een enum-classificatie; voor open tekst is hij te streng."
+        source: "PydanticAI h.15, p.151-152"
+      - id: w18c3
+        front: "Wat betekent de factor 0.95 in de DSPy-regressiecheck?"
+        back: "Een tolerantie van vijf procent relatieve daling ten opzichte van de baseline; daarboven faalt de build."
+        source: "DSPy h.18, p.134"
+      - id: w18c4
+        front: "Welke vier RAGAS-metrics gebruik je voor RAG-kwaliteit?"
+        back: "Faithfulness, answer relevancy, context precision en context recall."
+        source: "LlamaIndex h.11, p.113-115"
+      - id: w18c5
+        front: "Waarom een productiesteekproef met menselijk goedgekeurde antwoorden?"
+        back: "Die geeft een menselijk gecontroleerde bron voor evaluatie en detecteert kwaliteitsdaling die een vaste set mist."
+        source: "PydanticAI h.15, p.159"
+
+  - week: 19
+    phase: 4
+    title: "Performance, queues en multi-tenancy"
+    outcome: "Je schaalt de agent met begrensde concurrency en een queue, isoleert tenants in cache en data, en onderbouwt capaciteit met een loadtest op tienvoudige belasting."
+    reading:
+      - book: "PydanticAI: Building Production-Grade AI Agents"
+        ref: pydanticai
+        chapters: "9"
+        pages: "86-95"
+      - book: "Building Production-Ready AI Agents with LlamaIndex"
+        ref: llamaindex
+        chapters: "13"
+        pages: "133-145"
+      - book: "Mastering LangChain for Python Development"
+        ref: langchain
+        chapters: "10"
+        pages: "116-128"
+    build:
+      goal: "Bouw een async verwerkingspad met queue, rate limits en tenant-isolatie, plus een kostenmodel dat per tenant en per request klopt."
+      deliverable: "Repo agent-scale-01 met workerpool, queue, per-tenant quota, tenantgebonden caches, kostenmodel en loadtestrapport op tienvoudige belasting."
+      steps:
+        - "Scheid intake en verwerking: de API schrijft naar een queue en workers verwerken met een begrensde concurrency."
+        - "Stel per tenant een rate limit en queue-quota in en geef toegewezen werk een deadline en een maximum aantal pogingen."
+        - "Scope alle caches, vector-namespaces en logs per tenant; deel nooit een cache-key zonder tenant-id."
+        - "Bouw een kostenmodel per request met tokens in en uit, modelprijs en retries, en aggregeer per tenant en per dag."
+        - "Draai een loadtest op tienvoudige piek en rapporteer p50, p95, p99, foutpercentage en kosten per request."
+      done_when:
+        - "Geen enkele request wordt onbeperkt geparkeerd of verwerkt zonder tenantcontext."
+        - "Een tenant kan de quota van een andere tenant niet overschrijden of diens cache lezen."
+        - "Het loadtestrapport op tienvoudige belasting bevat p95, foutpercentage en kosten per request met een expliciet verdict."
+    challenge:
+      brief: "Bewijs met een loadtest op tienvoudige belasting dat het systeem binnen de quota blijft, tenants gescheiden houdt en de kosten per request kent."
+      verify: "python scripts/loadtest.py --multiplier 10"
+      acceptance:
+        - "De loadtest op tienvoudige belasting is uitgevoerd met p95, foutpercentage en kosten per request."
+        - "Tenant-isolatie is getest met een poging tot cross-tenant toegang."
+        - "Rate limits en queue-quota zijn aantoonbaar actief en geven backpressure."
+      evidence:
+        - "loadtestrapport met p95, foutpercentage en kosten"
+        - "kostentabel per tenant"
+        - "testbewijs van tenant-isolatie"
+    references:
+      - title: "LlamaIndex documentatie"
+        url: "https://docs.llamaindex.ai/"
+      - title: "LangChain documentatie"
+        url: "https://python.langchain.com/"
+    exam:
+      pass_score: 85
+      minutes: 20
+      questions:
+        - id: w19q1
+          type: mcq
+          prompt: "Wat is het verschil tussen onbeperkt asyncio.gather en een ConcurrencyLimitedModel met max_running 5 en max_queued 20?"
+          options:
+            A: "Geen verschil; beide begrenzen het aantal requests."
+            B: "Gather start alles tegelijk en kan de provider overspoelen; de limiter begrenst zowel parallelle calls als de wachtrij en geeft backpressure."
+            C: "De limiter verhoogt de doorvoer door meer retries toe te staan."
+            D: "Gather is alleen bruikbaar voor synchrone code."
+          answer: B
+          explanation: "Zonder grens starten alle taken tegelijk en volgen er 429-fouten en time-outs; de limiter begrenst de concurrency en de wachtrij, zodat overbelasting wordt afgewezen of geparkeerd."
+          source: "PydanticAI h.9, p.88-91"
+        - id: w19q2
+          type: mcq
+          prompt: "Een gedeelde Redis-cache keyt alleen op de prompttekst. Wat is het risico in een multi-tenant systeem?"
+          options:
+            A: "De cache wordt te groot en traag."
+            B: "De TTL werkt niet meer."
+            C: "De kosten per request stijgen."
+            D: "Een tenant kan het antwoord van een andere tenant krijgen, inclusief diens data."
+          answer: D
+          explanation: "Een gedeelde cache over instances werkt alleen veilig als de key tenantgebonden is; anders is een cachehit een datalek tussen tenants."
+          source: "LlamaIndex h.13, p.141; LangChain h.10, p.120"
+        - id: w19q3
+          type: mcq
+          prompt: "Wat is volgens LlamaIndex de grootste kostenhefboom in een RAG-systeem?"
+          options:
+            A: "Meer replicas draaien."
+            B: "Een groter model kiezen."
+            C: "Minder context: minder opgehaalde chunks per query."
+            D: "Langere system prompts gebruiken."
+          answer: C
+          explanation: "Minder context betekent minder inputtokens per call en raakt elke query; het staat bovenaan de kostenhierarchie, voor modeltiering en caching."
+          source: "LlamaIndex h.13, p.143"
+        - id: w19q4
+          type: mcq
+          prompt: "Je loadtest haalt p95 en foutpercentage, maar je besluit op alleen die twee. Welk gegeven ontbreekt om tienvoudige belasting economisch te beoordelen?"
+          options:
+            A: "Het aantal gebruikers per tenant."
+            B: "De kosten per request, inclusief tokens en retries."
+            C: "De naam van het model."
+            D: "De gemiddelde requestgrootte in bytes."
+          answer: B
+          explanation: "Zonder kosten per request weet je niet of de doorvoer betaalbaar blijft; je moet tokens, modelprijs en retries per request kunnen reconstrueren."
+          source: "LangChain h.10, p.125-128"
+        - id: w19q5
+          type: mcq
+          prompt: "Waarom is de standaardretry met exponentiële backoff geen capaciteitsmaatregel bij tienvoudige belasting?"
+          options:
+            A: "Omdat retries bij overbelasting de belasting verhogen en de staartlatentie verlengen; je hebt ook admission control, een queue en een lager concurrencyplafond nodig."
+            B: "Omdat retries de latentie verlagen."
+            C: "Omdat retries alleen bij authenticatiefouten werken."
+            D: "Omdat backoff de kosten verlaagt."
+          answer: A
+          explanation: "Retries herhalen werk dat al duur was en stapelen op tijdens een piek; begrensde concurrency, een queue en een maximum aantal pogingen voorkomen een retrystorm."
+          source: "LangChain h.10, p.116-117; PydanticAI h.9, p.90-91"
+        - id: w19q6
+          type: open
+          prompt: "Ontwerp een multi-tenant verwerkingsarchitectuur voor tienvoudige piek. Benoem queue, concurrency, quota, isolatie, kostenattributie en wat je loadtest moet aantonen."
+          key_points:
+            - "Intake en verwerking scheiden met een duurzame queue en idempotente job-ids."
+            - "Begrensde concurrency per worker en per tenant, met quota en eerlijke toewijzing."
+            - "Isolatie van cache, vector-namespace, logs en secrets per tenant."
+            - "Kostenattributie per tenant en per request, inclusief retries en tokens."
+            - "Een loadtest op tienvoudige piek met p95, foutpercentage en kosten per request als acceptatiecriteria."
+          model_answer: "De API schrijft een job met een idempotente id naar een duurzame queue en retourneert direct een status-URL. Workers halen werk op met een begrensde concurrency per worker en per tenant, zodat een grote tenant de rest niet verhongert. Per tenant staan een rate limit en een queue-quota ingesteld; boven de grens volgt een snelle weigering of een langere wachttijd in plaats van een retrystorm. Caches, vector-namespaces en logs krijgen een tenantprefix, zodat een cachehit nooit data van een andere tenant kan teruggeven. Elke request logt tokens, model, retries en kosten, geaggregeerd per tenant en per dag. De loadtest op tienvoudige piek moet aantonen dat p95 binnen de SLO blijft, het foutpercentage acceptabel is en de kosten per request het budget niet overschrijden."
+          source: "PydanticAI h.9; LlamaIndex h.13; LangChain h.10"
+    cards:
+      - id: w19c1
+        front: "Wat begrenst ConcurrencyLimit(max_running, max_queued)?"
+        back: "Het aantal parallelle modelcalls en de wachtrij; boven de grens volgt backpressure in plaats van een stroom 429-fouten."
+        source: "PydanticAI h.9, p.91"
+      - id: w19c2
+        front: "Waarom hoort een tenant-id in elke cache-key?"
+        back: "Een gedeelde cache keyt anders alleen op prompttekst, waardoor de ene tenant het antwoord van de andere kan krijgen."
+        source: "LlamaIndex h.13, p.141; LangChain h.10, p.120"
+      - id: w19c3
+        front: "Wat is de grootste kostenhefboom in een RAG-systeem?"
+        back: "Minder context: minder opgehaalde chunks per query verlaagt de inputtokens het sterkst."
+        source: "LlamaIndex h.13, p.143"
+      - id: w19c4
+        front: "Waarom is een retry geen capaciteitsmaatregel?"
+        back: "Retries voegen belasting toe tijdens overbelasting; je hebt ook een queue, quota en een begrensde concurrency nodig."
+        source: "LangChain h.10, p.116-117; PydanticAI h.9, p.90-91"
+      - id: w19c5
+        front: "Welke drie getallen horen minimaal in een loadtestrapport?"
+        back: "Staartlatentie (p95), foutpercentage per type en kosten per request."
+        source: "LangChain h.10, p.125-126; eigen loadtestdraaiboek"
+
+  - week: 20
+    phase: 4
+    title: "Reliability, SLO's en incidenten"
+    outcome: "Je maakt betrouwbaarheid meetbaar met SLO's en alerts, en je bewijst herstel met een restore-drill en een chaos-test met postmortem."
+    reading:
+      - book: "Mastering Claude Code"
+        ref: claudecode
+        chapters: "10"
+        pages: "124-134"
+      - book: "PydanticAI: Building Production-Grade AI Agents"
+        ref: pydanticai
+        chapters: "11"
+        pages: "105-113"
+      - book: "CrewAI in Action"
+        ref: crewai
+        chapters: "13"
+        pages: "146-170"
+    build:
+      goal: "Bouw de operationele laag: SLO's met een foutbudget, alerts op de juiste signalen, een geoefende backup en restore, en een chaos-test met een postmortem-template."
+      deliverable: "Repo agent-ops-01 met SLO-document, alertregels, verslag van de restore-drill, chaos-experiment en postmortem-template."
+      steps:
+        - "Definieer per kritiek pad een SLI en een SLO met een foutbudget, en kies p95 en p99 in plaats van gemiddelden."
+        - "Stel alerts in op symptomen die gebruikers raken: foutpercentage, staartlatentie, uitputting van het retrybudget en kostenanomalieen."
+        - "Automatiseer backup en restore; oefen een restore in een schone omgeving en meet de duur tegen je hersteltijddoel."
+        - "Voer een chaos-experiment uit: laat de provider falen of stop een worker tijdens verwerking, en observeer detectie en herstel."
+        - "Schrijf een postmortem met tijdlijn, impact, oorzaak, detectietijd en maatregelen met eigenaar en deadline."
+      done_when:
+        - "Elke SLO heeft een SLI, een drempel, een meetvenster en een eigenaar."
+        - "De restore-drill is uitgevoerd, niet alleen beschreven, met gemeten duur en dataverificatie."
+        - "Het chaos-experiment eindigt in een postmortem met minstens drie maatregelen."
+    challenge:
+      brief: "Bewijs dat je kunt herstellen en leren: een uitgevoerde restore-drill, een chaos-test met waargenomen impact en een postmortem met maatregelen."
+      verify: "bash scripts/restore_drill.sh"
+      acceptance:
+        - "De restore-drill is aantoonbaar uitgevoerd en de data is na restore gevalideerd."
+        - "Het chaos-experiment is uitgevoerd met een tijdlijn van detectie en herstel."
+        - "De postmortem noemt impact, oorzaak, detectietijd en maatregelen met een eigenaar."
+      evidence:
+        - "restore-log met gemeten duur"
+        - "tijdlijn van het chaos-experiment"
+        - "postmortem met maatregelen"
+    references:
+      - title: "Google SRE Workbook: implementing SLOs"
+        url: "https://sre.google/workbook/implementing-slos/"
+      - title: "Pydantic Logfire documentatie"
+        url: "https://logfire.pydantic.dev/docs/"
+    exam:
+      pass_score: 85
+      minutes: 20
+      questions:
+        - id: w20q1
+          type: mcq
+          prompt: "LLM-API-fouten stijgen naar vier procent, je eigen 5xx blijft op een procent en de latency stijgt. Wat is de eerste hypothese?"
+          options:
+            A: "Een bug in je prompttemplate."
+            B: "Een verkeerde modelkeuze in de configuratie."
+            C: "Een probleem bij de provider of op het netwerk naar de provider."
+            D: "Een tekort aan databaseconnecties."
+          answer: C
+          explanation: "Fouten die bij de providergrens ontstaan wijzen op een probleem bij de leverancier of het netwerk; je eigen foutpercentage blijft laag. Eerste actie is status en fallback checken, niet je prompt herschrijven."
+          source: "CrewAI h.13, p.157"
+        - id: w20q2
+          type: mcq
+          prompt: "Waarom alert je op uitputting van het validatie-retrybudget in plaats van op elke retry?"
+          options:
+            A: "Omdat een enkele retry normaal is, maar aanhoudende uitputting wijst op een structureel kwaliteits- of schemaprobleem."
+            B: "Omdat elke retry als een incident moet worden behandeld."
+            C: "Omdat retries de kosten verlagen."
+            D: "Omdat je dan de judge niet meer nodig hebt."
+          answer: A
+          explanation: "Een retry is een normale herstelpoging; pas als het budget structureel wordt uitgeput, is er een regressie in schema, prompt of model die aandacht vraagt."
+          source: "PydanticAI h.11, p.107-108"
+        - id: w20q3
+          type: mcq
+          prompt: "Waarom is een SLO op gemiddelde latency misleidend?"
+          options:
+            A: "Gemiddelden zijn altijd te hoog."
+            B: "Alleen p50 is relevant voor een SLO."
+            C: "Latency is geen bruikbare SLI."
+            D: "Het gemiddelde maskeert de staart; gebruik p95 en p99 om de ervaring van de traagste gebruikers te bewaken."
+          answer: D
+          explanation: "Een gemiddelde verbergt een kleine groep zeer trage requests; staartpercentielen maken zichtbaar wat gebruikers echt merken."
+          source: "PydanticAI h.11, p.107-108; CrewAI h.13, p.157"
+        - id: w20q4
+          type: mcq
+          prompt: "Een canary stuurt tien procent van het verkeer naar een nieuw model. Welke signalen vergelijk je per variant?"
+          options:
+            A: "Alleen de kosten per dag."
+            B: "Slagingspercentage van outputvalidatie, latency en tokengebruik per request."
+            C: "Alleen het totale aantal requests."
+            D: "De grootte van de context window."
+          answer: B
+          explanation: "Een canary is alleen nuttig als je per variant dezelfde kwaliteits- en prestatiegegevens vergelijkt; zonder die vergelijking kun je niet besluiten om uit te breiden of terug te rollen."
+          source: "PydanticAI h.11, p.110-111"
+        - id: w20q5
+          type: mcq
+          prompt: "Je lokale transcripts worden na veertien dagen verwijderd, maar een incident wordt pas na drie weken onderzocht. Wat is het risico en de maatregel?"
+          options:
+            A: "Geen risico, transcripts zijn voor onderzoek toch niet nodig."
+            B: "De alerts stoppen automatisch na veertien dagen."
+            C: "Het bewijs is weg; stuur de relevante logs naar een centrale opslag met een langere bewaartermijn en stel retentie bewust in."
+            D: "De SLO vervalt na veertien dagen."
+          answer: C
+          explanation: "Lokale retentie is kort en niet bedoeld als auditarchief; voor onderzoek en compliance heb je centrale, langer bewaarde logs nodig."
+          source: "Mastering Claude Code h.10, p.130-132"
+        - id: w20q6
+          type: open
+          prompt: "Schrijf de opzet van een postmortem na een chaos-experiment waarin de LLM-provider twintig minuten onbeschikbaar was. Benoem tijdlijn, impact, detectie, oorzaak, herstel en maatregelen."
+          key_points:
+            - "Een tijdlijn met start, detectie, eerste mitigatie en herstel, in een vaste tijdzone."
+            - "Impact in gebruikers- en SLO-termen: fouten, wachttijd en gemiste of vertraagde requests."
+            - "Oorzaken en bijdragende factoren, zoals ontbrekende fallback, retry-opbouw en een volle queue."
+            - "Maatregelen met eigenaar en deadline, plus bewijs dat fallback en restore werken."
+            - "Detectietijd en hersteltijd als leerpunten, met wat goed ging en wat niet."
+          model_answer: "De postmortem begint met een tijdlijn in UTC: wanneer de provider uitviel, wanneer de eerste alert afging, wanneer de eerste mitigatie startte en wanneer het verkeer weer normaal was. Daarna kwantificeer ik de impact: hoeveel requests faalden, hoeveel vertraging liepen gebruikers op en welk deel van het foutbudget is verbruikt. Ik benoem de oorzaak en de bijdragende factoren: er was geen fallbackmodel, retries verhoogden de druk en de queue liep vol. Het herstel bestond uit het omschakelen naar het fallbackmodel, het tijdelijk verlagen van de concurrency en het verwerken van de achterstand. Daarna volgen maatregelen met eigenaar en deadline: een fallbacktest in CI, een lagere retrygrens, een alert op queuediepte en een geoefende restore. Ik besluit met de detectietijd, de hersteltijd en wat er goed ging, zodat de volgende run sneller is."
+          source: "CrewAI h.13; PydanticAI h.11; Mastering Claude Code h.10"
+    cards:
+      - id: w20c1
+        front: "Welke alertdrempels noemt CrewAI voor productie?"
+        back: "p95-latency boven dertig seconden, foutpercentage boven vijf procent, LLM-API-fouten boven een procent, queue boven honderd taken en geheugen boven tachtig procent; tokengebruik dat verdubbelt."
+        source: "CrewAI h.13, p.157-158"
+      - id: w20c2
+        front: "Waarom alert je op uitputting van het retrybudget?"
+        back: "Een enkele retry is normaal; aanhoudende uitputting wijst op een structureel probleem in schema, prompt of model."
+        source: "PydanticAI h.11, p.107-108"
+      - id: w20c3
+        front: "Waarom p95 en p99 in plaats van het gemiddelde?"
+        back: "Het gemiddelde maskeert de staart; p95 en p99 laten de ervaring van de traagste gebruikers zien."
+        source: "PydanticAI h.11, p.107-108"
+      - id: w20c4
+        front: "Wat bewijst een restore-drill dat een backup niet bewijst?"
+        back: "Dat de data in een schone omgeving daadwerkelijk terugkomt binnen de afgesproken tijd en dat de integriteit klopt."
+        source: "Algemene productiepraktijk; Mastering Claude Code h.10, p.132"
+      - id: w20c5
+        front: "Wat hoort minimaal in een postmortem?"
+        back: "Tijdlijn, impact in gebruikers- en SLO-termen, oorzaak en bijdragende factoren, en maatregelen met eigenaar en deadline."
+        source: "Algemene productiepraktijk; PydanticAI h.11, p.107-108"

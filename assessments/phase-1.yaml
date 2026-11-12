@@ -1,0 +1,792 @@
+phase: 1
+title: "Fase 1 - Fundament: getypeerd, getest, gedeployed"
+weeks:
+  - week: 1
+    phase: 1
+    title: "Diagnose en je eerste getypeerde agent"
+    outcome: "Je bouwt een agent met een expliciet uitvoerschema, test hem deterministisch zonder netwerk en bewaakt de kwaliteit met CI."
+    reading:
+      - book: "PydanticAI: Building Production-Grade AI Agents"
+        ref: pydanticai
+        chapters: "1-2"
+        pages: "4-25"
+      - book: "Mastering Claude Code"
+        ref: claudecode
+        chapters: "1-3"
+        pages: "8-47"
+    build:
+      goal: "Zet een reproduceerbare Python-omgeving op en bouw een ticket-triage-agent die een gevalideerd TicketClassification-object teruggeeft."
+      deliverable: "Repo agent-lab-01 met agent, Pydantic-schema, 5 tests op TestModel, CI-workflow en README."
+      steps:
+        - "Maak de repo en een virtuele omgeving; pin pydantic-ai en pytest met exacte versies."
+        - "Definieer TicketClassification met urgentie-enum, samenvatting en needs_human."
+        - "Bouw Agent(output_type=TicketClassification) met een korte, versieerbare instructie."
+        - "Test met TestModel: geldig schema, ongeldige input, lange input, ontbrekende velden en een lege string."
+        - "Zet GitHub Actions op (install, tests) en zet een badge in de README."
+      done_when:
+        - "pytest slaagt lokaal en in CI zonder API-key of netwerk."
+        - "De README bevat het exacte commando om de tests te draaien."
+        - "Er staan geen secrets of .env-bestanden in de repo."
+    challenge:
+      brief: "Lever een werkende ticket-triage-agent met vijf tests en een groene CI-run. De agent moet zonder netwerk testbaar zijn."
+      verify: "python -m pytest -q"
+      acceptance:
+        - "De agent heeft een expliciet output_type en een enum voor urgentie."
+        - "Minstens vijf tests draaien op TestModel en falen niet door netwerktoegang."
+        - "CI is groen en de badge staat in de README."
+      evidence:
+        - "commit-sha van de werkende versie"
+        - "URL van de groene CI-run"
+        - "lokaal testresultaat"
+    references:
+      - title: "PydanticAI documentatie"
+        url: "https://ai.pydantic.dev/"
+      - title: "Claude Code documentatie"
+        url: "https://docs.anthropic.com/en/docs/claude-code/overview"
+    exam:
+      pass_score: 85
+      minutes: 20
+      questions:
+        - id: w1q1
+          type: mcq
+          prompt: "Wat doet output_type in PydanticAI?"
+          options:
+            A: "Het formatteert de prompt als JSON."
+            B: "Het valideert het eindantwoord tegen een schema en vraagt het model opnieuw bij een validatiefout."
+            C: "Het schakelt tool-gebruik uit."
+            D: "Het verplicht de provider om streaming te gebruiken."
+          answer: B
+          explanation: "output_type definieert het verwachte resultaattype; Pydantic valideert en bij een fout volgt een retry met foutinformatie."
+          source: "PydanticAI h.4, p.35-45"
+        - id: w1q2
+          type: mcq
+          prompt: "Waarvoor gebruik je TestModel in een agent-test?"
+          options:
+            A: "Om de echte LLM sneller te maken."
+            B: "Om kosten te meten in productie."
+            C: "Om deterministisch te testen zonder netwerk of API-key."
+            D: "Om embeddings te genereren."
+          answer: C
+          explanation: "TestModel simuleert het model deterministisch; je test je eigen code en contracten, niet de kwaliteit van de LLM."
+          source: "PydanticAI h.8, p.79-85"
+        - id: w1q3
+          type: mcq
+          prompt: "Waar hoort een API-key voor een agent?"
+          options:
+            A: "In een omgevingsvariabele of secret store, nooit in git."
+            B: "In de system prompt, zodat het model hem kan gebruiken."
+            C: "In de Dockerfile, zodat hij overal beschikbaar is."
+            D: "In een publieke CI-variabele."
+          answer: A
+          explanation: "Secrets horen buiten de code en buiten het image; via env/secrets en met minimale rechten."
+          source: "Algemene productiepraktijk; Claude Code h.11"
+        - id: w1q4
+          type: mcq
+          prompt: "Wat is de kern van een agent-loop?"
+          options:
+            A: "Eén prompt en één antwoord."
+            B: "Een cronjob die elke minuut een prompt stuurt."
+            C: "Een vectorstore die documenten terugvindt."
+            D: "Model geeft een tool-call, de tool geeft een resultaat, het model beslist daarna verder tot een eindantwoord."
+          answer: D
+          explanation: "De loop wisselt modelbeslissingen en tool-resultaten af tot het model een eindantwoord geeft of een stopconditie bereikt."
+          source: "PydanticAI h.2, p.9-25"
+        - id: w1q5
+          type: mcq
+          prompt: "Wat bewijst een groene CI-run?"
+          options:
+            A: "Dat de businesslogica correct is."
+            B: "Dat build en tests reproduceerbaar slagen op een schone checkout."
+            C: "Dat de agent sneller is dan de concurrentie."
+            D: "Dat de agent bestand is tegen prompt-injectie."
+          answer: B
+          explanation: "CI bewijst reproduceerbaarheid van build en tests, niet de inhoudelijke correctheid of veiligheid."
+          source: "Claude Code h.6 en h.9"
+        - id: w1q6
+          type: open
+          prompt: "Waarom is een getypeerde agent met output_type en validatie betrouwbaarder in productie dan een wrapper die vrije tekst teruggeeft? Noem vier redenen."
+          key_points:
+            - "Er is een expliciet contract (schema) tussen model en applicatie."
+            - "Ongeldige output wordt gedetecteerd en kan met foutcontext opnieuw worden geprobeerd."
+            - "De agent is deterministisch en geïsoleerd testbaar met TestModel/fakes."
+            - "Downstream-code kan veilig op velden vertrouwen en fouten zijn observeerbaar."
+          model_answer: "Een getypeerde agent maakt de verwachting expliciet: het model moet een schema invullen dat Pydantic valideert. Daardoor faalt ongeldige output voorspelbaar in plaats van stil door te stromen, kan de agent met foutcontext retryen of terugvallen, zijn tests deterministisch en zonder netwerk mogelijk, en kan de rest van het systeem op vaste velden en types bouwen. Fouten worden meetbaar en traceerbaar."
+          source: "PydanticAI h.2 en h.4"
+    cards:
+      - id: w1c1
+        front: "Wat doet output_type in PydanticAI?"
+        back: "Het definieert het verwachte resultaattype; het antwoord wordt ertegen gevalideerd en bij een validatiefout volgt een retry."
+        source: "PydanticAI h.4"
+      - id: w1c2
+        front: "Waarom TestModel gebruiken in tests?"
+        back: "Deterministisch testen zonder netwerk of API-key; je test je agentcode en contracten, niet het taalmodel."
+        source: "PydanticAI h.8"
+      - id: w1c3
+        front: "Beschrijf de agent-loop in vier stappen."
+        back: "Prompt/context -> model beslist -> tool-call wordt uitgevoerd -> resultaat gaat terug naar het model, tot een eindantwoord of stopconditie."
+        source: "PydanticAI h.2"
+      - id: w1c4
+        front: "Waar bewaar je secrets en waarom?"
+        back: "In een secret store of omgevingsvariabele, buiten git en buiten het image; met minimale rechten en nooit in prompts of logs."
+        source: "Claude Code h.11"
+      - id: w1c5
+        front: "Wat is een eerlijke definition of done voor een agentfeature?"
+        back: "Werkende code, geautomatiseerde tests, groene CI, een korte README/runbook en vastgelegd bewijs (commit, testrun, demo)."
+        source: "Claude Code h.6"
+
+  - week: 2
+    phase: 1
+    title: "Modelkeuze, promptbeleid en kosten"
+    outcome: "Je kiest een model op basis van gemeten kwaliteit, latency en kosten, en je begrenst en logt het verbruik per run."
+    reading:
+      - book: "PydanticAI: Building Production-Grade AI Agents"
+        ref: pydanticai
+        chapters: "3"
+        pages: "26-34"
+      - book: "Mastering Claude Code"
+        ref: claudecode
+        chapters: "4"
+        pages: "48-61"
+    build:
+      goal: "Maak model- en promptkeuzes expliciet en meetbaar: configureer het model via env, versioneer de instructie, begrens tokens en log kosten en latency."
+      deliverable: "Agent met configureerbaar model, UsageLimits, gestructureerde kostenlogging en een A/B-rapport van twee prompts op tien cases."
+      steps:
+        - "Lees modelkeuze en hyperparameters; kies twee kandidaten en noteer prijs, context en latency."
+        - "Maak het model configureerbaar via omgevingsvariabelen; geen modelnaam hardcoded in domeincode."
+        - "Zet UsageLimits (requests en tokens) en een timeout per run."
+        - "Log per run: model, tokens in/uit, latency, geschatte kosten en promptversie."
+        - "Draai twee promptvarianten op dezelfde tien cases en schrijf een kort besluit met cijfers."
+      done_when:
+        - "Een run zonder limiet kan niet per ongeluk onbeperkt tokens verbruiken."
+        - "Het A/B-rapport bevat kwaliteitsscore, latency en kosten per variant."
+        - "De gekozen prompt en het model staan met reden in de README."
+    challenge:
+      brief: "Bouw een kosten- en latencyguard: een run stopt bij overschrijding van het budget en logt genoeg om kosten per request te kunnen reconstrueren."
+      verify: "python -m pytest -q"
+      acceptance:
+        - "UsageLimits of een gelijkwaardige harde grens is aantoonbaar actief."
+        - "Per run worden tokens, latency en kosten gelogd."
+        - "Het A/B-rapport vergelijkt tien cases op kwaliteit, latency en kosten."
+      evidence:
+        - "commit-sha"
+        - "kostenlog of meetrapport"
+        - "A/B-besluit in de README"
+    references:
+      - title: "PydanticAI modellen en configuratie"
+        url: "https://ai.pydantic.dev/models/"
+      - title: "PydanticAI agents en usage"
+        url: "https://ai.pydantic.dev/agents/"
+    exam:
+      pass_score: 85
+      minutes: 20
+      questions:
+        - id: w2q1
+          type: mcq
+          prompt: "Wat doet temperature = 0 in de praktijk?"
+          options:
+            A: "Het maakt de output gegarandeerd identiek bij elke call."
+            B: "Het maakt sampling deterministischer, maar identieke output is niet gegarandeerd."
+            C: "Het verhoogt de creativiteit."
+            D: "Het schakelt de context window uit."
+          answer: B
+          explanation: "Temperature 0 verlaagt de randomness, maar providers, modellen en infrastructuur kunnen nog steeds variatie veroorzaken."
+          source: "PydanticAI h.3, p.26-34"
+        - id: w2q2
+          type: mcq
+          prompt: "Waarom stel je UsageLimits in?"
+          options:
+            A: "Om de kwaliteit van het model te verhogen."
+            B: "Om de context window te vergroten."
+            C: "Om kosten en runaway-loops hard te begrenzen."
+            D: "Om streaming mogelijk te maken."
+          answer: C
+          explanation: "UsageLimits begrenzen requests en tokens, zodat een fout of loop niet onbeperkt geld kost."
+          source: "PydanticAI h.3"
+        - id: w2q3
+          type: mcq
+          prompt: "Wat is een goede manier om prompts te beheren?"
+          options:
+            A: "Prompts in git versioneeren en bij elke wijziging de eval opnieuw draaien."
+            B: "Prompts alleen in de database zetten zonder historie."
+            C: "Prompts hardcoden in meerdere modules."
+            D: "Prompts nooit aanpassen na de eerste release."
+          answer: A
+          explanation: "Een prompt is productcode: versieer hem, koppel er een eval aan en houd wijzigingen traceerbaar."
+          source: "Claude Code h.4 en h.6"
+        - id: w2q4
+          type: mcq
+          prompt: "Hoe kies je verantwoord een model voor een taak?"
+          options:
+            A: "Altijd het duurste model nemen."
+            B: "Altijd het goedkoopste model nemen."
+            C: "Het model met de langste context nemen."
+            D: "Meten op een representatieve set: kwaliteit, latency en kosten tegen je eisen."
+          answer: D
+          explanation: "Modelkeuze is een trade-off die je met je eigen data en eisen meet, niet met een algemene ranglijst."
+          source: "PydanticAI h.3"
+        - id: w2q5
+          type: mcq
+          prompt: "Wat verandert er door streaming?"
+          options:
+            A: "De totale verwerkingstijd wordt altijd korter."
+            B: "De eerste tokens arriveren eerder, maar de totale tijd hoeft niet korter te zijn."
+            C: "De kosten worden altijd lager."
+            D: "Validatie van output wordt overbodig."
+          answer: B
+          explanation: "Streaming verbetert de ervaren latency; de totale tijd en kosten blijven in dezelfde orde."
+          source: "PydanticAI h.3"
+        - id: w2q6
+          type: open
+          prompt: "Ontwerp een kostenbudget voor een agent die maximaal EUR 0,02 per request mag kosten. Noem vier concrete maatregelen en hoe je ze meetbaar maakt."
+          key_points:
+            - "Een token- en requestbudget per run (UsageLimits) en een maximum aantal stappen."
+            - "Model- en promptkeuze op basis van gemeten kosten/kwaliteit, met caching waar mogelijk."
+            - "Per run tokens, latency en kosten loggen en aggregeren per dag/tenant."
+            - "Alarmen en harde stop bij overschrijding, plus een fallback naar een goedkoper model."
+          model_answer: "Ik begrens elke run met UsageLimits op requests en tokens en met een maximum aantal tool-stappen. Ik kies het model op een gemeten kwaliteit/kosten-curve en cache identieke of sterk vergelijkbare requests. Per run log ik tokens, latency en kosten, geaggregeerd per dag en per tenant. Bij overschrijding volgt een alert en een harde stop of fallback naar een goedkoper model. Het budget is dus een combinatie van preventie, meting en noodrem."
+          source: "PydanticAI h.3; Claude Code h.9"
+    cards:
+      - id: w2c1
+        front: "Wat betekent temperature = 0 precies?"
+        back: "Deterministischer sampler, maar geen garantie op identieke output; provider en infrastructuur kunnen variatie geven."
+        source: "PydanticAI h.3"
+      - id: w2c2
+        front: "Waarvoor dienen UsageLimits?"
+        back: "Harde bovengrens op requests en tokens per run, tegen runaway-loops en onverwachte kosten."
+        source: "PydanticAI h.3"
+      - id: w2c3
+        front: "Waarom is een prompt een versieerbaar artefact?"
+        back: "Omdat promptwijzigingen gedrag wijzigen; je wilt diff, historie en een gekoppelde eval."
+        source: "Claude Code h.4"
+      - id: w2c4
+        front: "Wat meet je bij modelselectie minstens?"
+        back: "Kwaliteit op een representatieve set, p50/p95 latency en kosten per request."
+        source: "PydanticAI h.3"
+      - id: w2c5
+        front: "Wat is het verschil tussen ervaren en werkelijke latency bij streaming?"
+        back: "Streaming verlaagt de tijd tot het eerste token; de totale verwerkingstijd blijft vergelijkbaar."
+        source: "PydanticAI h.3"
+
+  - week: 3
+    phase: 1
+    title: "Structured output en foutmodellen"
+    outcome: "Je ontwerpt een strikt outputschema en een expliciete fouttaxonomie, zodat ongeldige modeloutput voorspelbaar wordt afgehandeld."
+    reading:
+      - book: "PydanticAI: Building Production-Grade AI Agents"
+        ref: pydanticai
+        chapters: "4"
+        pages: "35-45"
+    build:
+      goal: "Bouw een factuur-extractie-agent met geneste modellen, enums en veldvalidators, plus een retry- en fallbackpad."
+      deliverable: "Agent met Invoice-schema, validators, ModelRetry-afhandeling, tien foutscenario-tests en een fouttaxonomie in de README."
+      steps:
+        - "Modelleer Invoice, InvoiceLine en Valuta als Pydantic-modellen; gebruik enums voor vaste waarden."
+        - "Voeg validators toe voor datums, bedragen en de som van regels."
+        - "Bepaal wat een retry waard is en wat een harde afwijzing moet zijn."
+        - "Test tien ongeldige inputs: fout JSON, verkeerd type, onbekende enum, negatief bedrag, ontbrekend veld, enz."
+        - "Documenteer de fouttaxonomie en het gekozen herstelpad."
+      done_when:
+        - "Geen enkele ongeldige input crasht de applicatie zonder gecontroleerde fout."
+        - "Elke foutsoort heeft een test en een gedocumenteerde reactie."
+        - "De validators dekken zowel vorm als betekenis (bedragen, datums)."
+    challenge:
+      brief: "Bewijs met tien tests dat ongeldige modeloutput leidt tot een voorspelbare, gecontroleerde uitkomst in plaats van een crash of stille corruptie."
+      verify: "python -m pytest -q"
+      acceptance:
+        - "Tien ongeldige inputs zijn getest."
+        - "De fouttaxonomie onderscheidt vorm-, semantische en transportfouten."
+        - "Er is een expliciet retry- en fallbackbeleid."
+      evidence:
+        - "commit-sha"
+        - "testrapport"
+        - "fouttaxonomie in de README"
+    references:
+      - title: "PydanticAI output en validatie"
+        url: "https://ai.pydantic.dev/output/"
+      - title: "Pydantic validators"
+        url: "https://docs.pydantic.dev/latest/concepts/validators/"
+    exam:
+      pass_score: 85
+      minutes: 20
+      questions:
+        - id: w3q1
+          type: mcq
+          prompt: "Wat is de beste reactie wanneer het model output levert die niet aan het schema voldoet?"
+          options:
+            A: "De fout negeren en het veld leeg laten."
+            B: "Een gerichte retry doen met de validatiefout als context, binnen een begrensd aantal pogingen."
+            C: "De applicatie laten crashen."
+            D: "Het schema verruimen zodat elke output geldig is."
+          answer: B
+          explanation: "Een gerichte retry met foutcontext herstelt vaak; het aantal pogingen moet begrensd zijn en daarna volgt fallback of falen."
+          source: "PydanticAI h.4"
+        - id: w3q2
+          type: mcq
+          prompt: "Waarom is een enum beter dan een vrije string voor een statusveld?"
+          options:
+            A: "Een enum is altijd sneller."
+            B: "Een enum maakt de prompt korter."
+            C: "Een enum beperkt de geldige waarden en laat ongeldige output meteen falen."
+            D: "Een enum voorkomt dat het model hallucineert."
+          answer: C
+          explanation: "Een enum maakt de contractruimte expliciet; onbekende waarden worden bij validatie afgewezen."
+          source: "PydanticAI h.4"
+        - id: w3q3
+          type: mcq
+          prompt: "Wat is een semantische validatie die een schema alleen niet afdwingt?"
+          options:
+            A: "Dat een factuurregel meer dan nul euro kost."
+            B: "Dat het veld een string is."
+            C: "Dat het veld verplicht is."
+            D: "Dat het veld een maximum lengte heeft."
+          answer: A
+          explanation: "Bedragen, datums en consistentie tussen velden zijn betekenisregels; die horen in validators, niet alleen in types."
+          source: "PydanticAI h.4"
+        - id: w3q4
+          type: mcq
+          prompt: "Wat is het voordeel van NativeOutput (provider-side structured output)?"
+          options:
+            A: "Het maakt validatie overbodig."
+            B: "Het werkt alleen met lokale modellen."
+            C: "Het verlaagt altijd de kosten."
+            D: "De provider levert al een gestructureerd formaat, maar je blijft zelf valideren."
+          answer: D
+          explanation: "Native structured output verhoogt de kans op geldige vorm, maar je applicatie moet het resultaat alsnog valideren."
+          source: "PydanticAI h.4"
+        - id: w3q5
+          type: mcq
+          prompt: "Welke fout is een transportfout en geen validatiefout?"
+          options:
+            A: "Een verkeerd datumformaat."
+            B: "Een time-out of 503 van de provider."
+            C: "Een onbekende enumwaarde."
+            D: "Een ontbrekend verplicht veld."
+          answer: B
+          explanation: "Transportfouten gaan over netwerk, rate limits en time-outs; die vragen een ander retrybeleid dan schendingen van het contract."
+          source: "PydanticAI h.4 en h.5"
+        - id: w3q6
+          type: open
+          prompt: "Beschrijf een fouttaxonomie voor structured output en geef per categorie een passende maatregel."
+          key_points:
+            - "Vormfouten (geen geldige JSON/schema): valideren en gericht retryen."
+            - "Semantische fouten (bedrag, datum, consistentie): domeinvalidatie en retry of handmatige review."
+            - "Transportfouten (time-out, rate limit): retry met backoff en uiteindelijk fallback."
+            - "Weigering of onbruikbare input: stoppen, escaleren en de input verbeteren."
+          model_answer: "Ik onderscheid vier categorieen. Vormfouten worden door Pydantic gevangen en met foutcontext binnen een limiet opnieuw geprobeerd. Semantische fouten vang ik met domeinvalidators; afhankelijk van de ernst volgt een retry of een reviewwachtrij. Transportfouten behandel ik met backoff, jitter en een maximum, daarna fallback of falen. Bij een weigering of structureel onbruikbare input stop ik, escaleer ik en verbeter ik de input of prompt. Elke categorie heeft een eigen test en logevent."
+          source: "PydanticAI h.4"
+    cards:
+      - id: w3c1
+        front: "Wat is een gerichte retry bij validatiefouten?"
+        back: "Opnieuw vragen met de concrete validatiefout als context, binnen een begrensd aantal pogingen."
+        source: "PydanticAI h.4"
+      - id: w3c2
+        front: "Waarom een enum in een outputschema?"
+        back: "Het beperkt de geldige waarden en maakt onbekende waarden direct zichtbaar bij validatie."
+        source: "PydanticAI h.4"
+      - id: w3c3
+        front: "Wat is NativeOutput?"
+        back: "Provider-side structured output; de vorm is beter gegarandeerd, maar applicatievalidatie blijft nodig."
+        source: "PydanticAI h.4"
+      - id: w3c4
+        front: "Geef drie semantische validaties voor een factuur."
+        back: "Regelbedrag > 0, vervaldatum na factuurdatum, en som van regels plus btw gelijk aan totaal."
+        source: "PydanticAI h.4"
+      - id: w3c5
+        front: "Noem de vier foutcategorieen uit de fouttaxonomie."
+        back: "Vormfout, semantische fout, transportfout en weigering/onbruikbare input."
+        source: "PydanticAI h.4"
+
+  - week: 4
+    phase: 1
+    title: "Tools met contracten"
+    outcome: "Je ontwerpt tools als kleine, getypeerde API's met idempotentie, time-outs en voorspelbare fouten."
+    reading:
+      - book: "PydanticAI: Building Production-Grade AI Agents"
+        ref: pydanticai
+        chapters: "5"
+        pages: "46-54"
+    build:
+      goal: "Bouw drie tools met een expliciet contract: een read-only zoekactie, een berekening en een externe HTTP-call met idempotentiesleutel."
+      deliverable: "Toolmodule met schema's, time-outs, retrybeleid, getypeerde fouten en tests met fakes."
+      steps:
+        - "Definieer per tool invoer- en uitvoertypes; schrijf docstrings die het model helpen kiezen."
+        - "Maak neveneffecten idempotent met een client-side idempotentiesleutel."
+        - "Voeg time-outs en een begrensd retrybeleid toe voor tijdelijke fouten."
+        - "Geef fouten als gestructureerde data terug in plaats van een kale exception."
+        - "Test elke tool met een fake: succes, time-out, rate limit en ongeldige input."
+      done_when:
+        - "Elke tool heeft minimaal vier tests."
+        - "Een dubbele call met dezelfde idempotentiesleutel veroorzaakt geen dubbel neveneffect."
+        - "De agent kan op een tool-fout verder of stopt gecontroleerd."
+    challenge:
+      brief: "Lever een toolsuite met contracttests waaruit blijkt dat time-outs, retries en idempotentie correct werken."
+      verify: "python -m pytest -q"
+      acceptance:
+        - "Drie tools met getypeerde invoer en uitvoer."
+        - "Idempotentie is getest met een dubbele call."
+        - "Time-outs en retries zijn getest; fouten zijn gestructureerd."
+      evidence:
+        - "commit-sha"
+        - "testrapport"
+        - "korte toolcontracten in de README"
+    references:
+      - title: "PydanticAI tools"
+        url: "https://ai.pydantic.dev/tools/"
+      - title: "HTTP-retry en backoff"
+        url: "https://opentelemetry.io/docs/"
+    exam:
+      pass_score: 85
+      minutes: 20
+      questions:
+        - id: w4q1
+          type: mcq
+          prompt: "Waar komt het tool-schema in PydanticAI vooral vandaan?"
+          options:
+            A: "Uit de type hints, docstring en het model dat je voor de toolargumenten definieert."
+            B: "Uit een willekeurige JSON-string in de prompt."
+            C: "Uit de systeemtijd."
+            D: "Uit de vectorstore."
+          answer: A
+          explanation: "PydanticAI genereert het schema uit de functiesignatuur en docstring; duidelijke types en uitleg zijn dus essentieel."
+          source: "PydanticAI h.5"
+        - id: w4q2
+          type: mcq
+          prompt: "Waarom gebruik je een idempotentiesleutel bij een tool met neveneffecten?"
+          options:
+            A: "Om de tool sneller te maken."
+            B: "Om de prompt korter te maken."
+            C: "Om te voorkomen dat een retry het effect dubbel uitvoert."
+            D: "Om het model te dwingen minder tokens te gebruiken."
+          answer: C
+          explanation: "Bij netwerk-retries kan dezelfde actie twee keer aankomen; de sleutel laat de server het effect eenmalig toepassen."
+          source: "PydanticAI h.5"
+        - id: w4q3
+          type: mcq
+          prompt: "Welk retrybeleid is verstandig voor een tijdelijke 503?"
+          options:
+            A: "Onmiddellijk oneindig blijven herhalen."
+            B: "Een paar pogingen met exponentiële backoff en jitter, daarna stoppen of fallback."
+            C: "Helemaal niet retryen."
+            D: "De fout aan het model geven zonder limiet."
+          answer: B
+          explanation: "Backoff met jitter voorkomt thundering herd; een maximum voorkomt hangs en onbeperkte kosten."
+          source: "PydanticAI h.5"
+        - id: w4q4
+          type: mcq
+          prompt: "Wat betekent least privilege voor tools?"
+          options:
+            A: "Elke tool krijgt dezelfde ruime rechten."
+            B: "Tools krijgen alleen de rechten die ze voor hun taak nodig hebben."
+            C: "Tools mogen altijd in de productiedatabase schrijven."
+            D: "Tools draaien zonder logging."
+          answer: B
+          explanation: "Beperkte rechten verkleinen de impact van een verkeerde tool-call of een prompt-injectie."
+          source: "PydanticAI h.5 en h.10"
+        - id: w4q5
+          type: mcq
+          prompt: "Waarom geef je toolfouten als gestructureerde data terug aan het model?"
+          options:
+            A: "Zodat het model kan zien wat er misging en een andere strategie kan kiezen."
+            B: "Zodat de fout verdwijnt."
+            C: "Om de fout nooit te loggen."
+            D: "Om de tool duurder te maken."
+          answer: A
+          explanation: "Een gestructureerde fout (code, boodschap, retrybaar) geeft het model en je observability de informatie om te herstellen."
+          source: "PydanticAI h.5"
+        - id: w4q6
+          type: open
+          prompt: "Ontwerp het contract voor een send_email-tool. Benoem argumenten, idempotentie, droogloop, fouten en logging."
+          key_points:
+            - "Getypeerde argumenten (ontvanger, onderwerp, body) met validatie van het e-mailadres."
+            - "Een idempotentiesleutel per logische verzending en een droogloopmodus."
+            - "Getypeerde fouten: validatie, rate limit, tijdelijke transportfout, permanente weigering."
+            - "Auditlogging van wie/wat/wanneer en een begrensd retrybeleid."
+          model_answer: "De tool krijgt getypeerde argumenten: ontvanger, onderwerp en body, met e-mailvalidatie. Elke logische verzending krijgt een idempotentiesleutel, zodat een retry niet dubbel verstuurt. Er is een dry_run-modus die het bericht valideert en logt zonder te verzenden. Fouten zijn getypeerd: validatiefout, rate limit, tijdelijke transportfout en permanente weigering, elk met een retryadvies. Elke call wordt geaudit met tijd, actor, ontvanger en resultaat, en retries zijn begrensd met backoff."
+          source: "PydanticAI h.5"
+    cards:
+      - id: w4c1
+        front: "Hoe ontstaat het schema van een PydanticAI-tool?"
+        back: "Uit de functiesignatuur, type hints en docstring; het schema wordt aan het model gegeven."
+        source: "PydanticAI h.5"
+      - id: w4c2
+        front: "Wanneer is een idempotentiesleutel nodig?"
+        back: "Bij tools met neveneffecten die door een retry of dubbele call twee keer uitgevoerd kunnen worden."
+        source: "PydanticAI h.5"
+      - id: w4c3
+        front: "Hoe retry je tijdelijke fouten verantwoord?"
+        back: "Beperkt aantal pogingen, exponentiële backoff met jitter, en daarna fallback of gecontroleerd falen."
+        source: "PydanticAI h.5"
+      - id: w4c4
+        front: "Wat is least privilege voor een tool?"
+        back: "De tool krijgt alleen de rechten en data die nodig zijn voor zijn taak, niet meer."
+        source: "PydanticAI h.5"
+      - id: w4c5
+        front: "Waarom fouten als data teruggeven aan het model?"
+        back: "Het model kan de fout begrijpen en een andere strategie kiezen; jij kunt haar loggen en meten."
+        source: "PydanticAI h.5"
+
+  - week: 5
+    phase: 1
+    title: "Dependencies, testing en observability"
+    outcome: "Je scheidt domeinlogica van infrastructuur met dependency injection en bewijst gedrag met een testpiramide en traces."
+    reading:
+      - book: "PydanticAI: Building Production-Grade AI Agents"
+        ref: pydanticai
+        chapters: "6, 8"
+        pages: "55-64, 79-85"
+      - book: "Mastering Claude Code"
+        ref: claudecode
+        chapters: "6"
+        pages: "82-92"
+    build:
+      goal: "Herschrijf de agent met dependency injection: echte adapters in productie, fakes in tests, en traceerbare logs per run."
+      deliverable: "Agent met Deps-object, fake- en echte adapters, unit/integratie-scheiding, trace-ID en een testpiramide-document."
+      steps:
+        - "Definieer een Deps-dataclass met clients, klok en configuratie."
+        - "Injecteer de dependencies via RunContext; geen globale clients in domeincode."
+        - "Bouw fakes voor de LLM-client en de externe API."
+        - "Scheid unit-tests (geen netwerk) van integratietests (echte I/O) met markers."
+        - "Voeg gestructureerde logs en een trace-ID toe; documenteer de testpiramide."
+      done_when:
+        - "Unit-tests draaien zonder netwerk en zonder API-key."
+        - "Een integratietest bewijst het contract met de echte adapter."
+        - "Elke run is terug te vinden via een trace-ID in de logs."
+    challenge:
+      brief: "Lever bewijs dat je agent testbaar is zonder netwerk en dat een productie-run volledig traceerbaar is."
+      verify: "python -m pytest -q -m 'not integration'"
+      acceptance:
+        - "Dependency injection is aantoonbaar gebruikt."
+        - "Unit- en integratietests zijn gescheiden."
+        - "Er is een trace-ID en gestructureerde logging."
+      evidence:
+        - "commit-sha"
+        - "testrapport"
+        - "voorbeeld van een trace/logregel"
+    references:
+      - title: "PydanticAI testing"
+        url: "https://ai.pydantic.dev/testing/"
+      - title: "OpenTelemetry"
+        url: "https://opentelemetry.io/docs/"
+    exam:
+      pass_score: 85
+      minutes: 20
+      questions:
+        - id: w5q1
+          type: mcq
+          prompt: "Wat is het belangrijkste voordeel van dependency injection in een agent?"
+          options:
+            A: "De agent wordt automatisch goedkoper."
+            B: "Je kunt infrastructuur vervangen door fakes en domeinlogica geïsoleerd testen."
+            C: "Het model heeft geen prompt meer nodig."
+            D: "Je hebt geen validatie meer nodig."
+          answer: B
+          explanation: "DI maakt afhankelijkheden expliciet en vervangbaar; daardoor zijn tests snel, deterministisch en zonder netwerk."
+          source: "PydanticAI h.6"
+        - id: w5q2
+          type: mcq
+          prompt: "Wat is een fake in een agent-test?"
+          options:
+            A: "Een echte productie-API met een testaccount."
+            B: "Een willekeurige string."
+            C: "Een vervangende implementatie met voorspelbaar gedrag, zonder echte I/O."
+            D: "Een model dat altijd het juiste antwoord geeft."
+          answer: C
+          explanation: "Een fake implementeert hetzelfde contract met gecontroleerd gedrag, zodat je fouten en randgevallen kunt simuleren."
+          source: "PydanticAI h.8"
+        - id: w5q3
+          type: mcq
+          prompt: "Wat is het verschil tussen een unit- en een integratietest?"
+          options:
+            A: "Unit is snel en geïsoleerd; integratie test de samenwerking met echte infrastructuur."
+            B: "Unit draait alleen in CI; integratie alleen lokaal."
+            C: "Integratie gebruikt geen asserts."
+            D: "Unit test alleen de UI."
+          answer: A
+          explanation: "De scheiding houdt de snelle feedbackloop schoon en bewijst daarnaast dat adapters echt werken."
+          source: "PydanticAI h.8"
+        - id: w5q4
+          type: mcq
+          prompt: "Waarvoor dient een trace-ID?"
+          options:
+            A: "Om de prompt korter te maken."
+            B: "Om het model te selecteren."
+            C: "Om kosten te verbergen."
+            D: "Om alle stappen van een request causale volgorde te geven over logs en services heen."
+          answer: D
+          explanation: "Met een trace-ID koppel je modelcalls, toolcalls, fouten en latency aan een enkele run."
+          source: "PydanticAI h.8"
+        - id: w5q5
+          type: mcq
+          prompt: "Wat zegt 100% code coverage?"
+          options:
+            A: "Dat alle gedrag correct is."
+            B: "Dat elke regel is uitgevoerd, maar niet dat de assertions of randgevallen goed zijn."
+            C: "Dat er geen bugs meer zijn."
+            D: "Dat de agent veilig is."
+          answer: B
+          explanation: "Coverage meet uitgevoerde regels, niet de kwaliteit van je tests of de correctheid van gedrag."
+          source: "Claude Code h.6"
+        - id: w5q6
+          type: open
+          prompt: "Beschrijf de testpiramide voor agents: welke lagen, wat test elke laag en waarom?"
+          key_points:
+            - "Unit-tests: pure domeinlogica en parsers, snel en zonder netwerk."
+            - "Contracttests: tools en adapters tegen hun schema en foutgedrag, met fakes."
+            - "Eval-tests: kwaliteit op een representatieve dataset, met metrics en drempels."
+            - "E2E/smoke: de gedeployde keten, inclusief health, auth en een kritiek pad."
+          model_answer: "Onderaan staan snelle unit-tests voor pure logica en parsers. Daarboven contracttests die tools en adapters tegen hun schema en foutgedrag testen met fakes. Dan volgen eval-tests op een representatieve dataset met kwaliteitsmetrics en drempels, want agents falen vaak semantisch. Bovenaan staat een kleine e2e/smoke-test op de gedeployde keten: health, auth en het kritieke pad. Zo krijg je snelle feedback en bewijs je tegelijk het echte gedrag."
+          source: "Claude Code h.6; PydanticAI h.8"
+    cards:
+      - id: w5c1
+        front: "Waarom dependency injection in agentcode?"
+        back: "Afhankelijkheden expliciet en vervangbaar maken, zodat domeinlogica geïsoleerd en zonder netwerk testbaar is."
+        source: "PydanticAI h.6"
+      - id: w5c2
+        front: "Wat is een fake en hoe verschilt die van een mock?"
+        back: "Een fake is een werkende vervanging met voorspelbaar gedrag; een mock registreert vooral calls en verwachtingen."
+        source: "PydanticAI h.8"
+      - id: w5c3
+        front: "Noem de vier lagen van de agent-testpiramide."
+        back: "Unit, contract, eval en e2e/smoke."
+        source: "Claude Code h.6"
+      - id: w5c4
+        front: "Wat is een trace-ID?"
+        back: "Een ID die alle stappen van een request over logs en services heen aan elkaar koppelt."
+        source: "PydanticAI h.8"
+      - id: w5c5
+        front: "Waarom is coverage een zwakke bewijsvorm?"
+        back: "Het meet uitgevoerde regels, niet of assertions het juiste gedrag bewaken of randgevallen dekken."
+        source: "Claude Code h.6"
+
+  - week: 6
+    phase: 1
+    title: "Workflow, container, CI/CD en VPS-deploy"
+    outcome: "Je levert een agent als immutable container via CI naar je VPS, met healthcheck, smoke-test en een bewezen rollback."
+    reading:
+      - book: "PydanticAI: Building Production-Grade AI Agents"
+        ref: pydanticai
+        chapters: "7, 11"
+        pages: "65-78, 105-113"
+      - book: "Mastering Claude Code"
+        ref: claudecode
+        chapters: "9"
+        pages: "117-123"
+    build:
+      goal: "Vervang de losse run door een kleine workflow: intake, verwerking en opslag. Containeriseer de agent en deploy hem reproduceerbaar op de VPS."
+      deliverable: "Dockerfile, compose-bestand, CI-workflow naar GHCR, healthcheck, smoke-test, deploy- en rollbackrunbook."
+      steps:
+        - "Bouw een workflow met twee stappen en een expliciete stopconditie."
+        - "Schrijf een slanke Dockerfile met een non-root user en een healthcheck."
+        - "Laat CI het image bouwen, testen en met een immutable tag naar GHCR pushen."
+        - "Deploy op de VPS met compose; injecteer secrets via env, niet via het image."
+        - "Doe een smoke-test, simuleer een rollback en schrijf het runbook."
+      done_when:
+        - "Het image draait op de VPS en /health geeft 200."
+        - "De smoke-test bewijst het kritieke pad end-to-end."
+        - "Een rollback naar de vorige tag is uitgevoerd en gedocumenteerd."
+    challenge:
+      brief: "Bewijs een volledige deployment: CI bouwt en pusht, de VPS draait de nieuwe versie, de smoke-test slaagt en een rollback werkt."
+      verify: "bash scripts/smoke.sh"
+      acceptance:
+        - "Image met immutable tag in GHCR."
+        - "Healthcheck en smoke-test slagen tegen de VPS."
+        - "Rollback is minstens een keer uitgevoerd en vastgelegd."
+      evidence:
+        - "CI-run-URL"
+        - "health/smoke-output"
+        - "rollback-log en runbook"
+    references:
+      - title: "GitHub Actions"
+        url: "https://docs.github.com/en/actions"
+      - title: "Docker best practices"
+        url: "https://docs.docker.com/build/building/best-practices/"
+    exam:
+      pass_score: 85
+      minutes: 20
+      questions:
+        - id: w6q1
+          type: mcq
+          prompt: "Waarom heeft een container een healthcheck?"
+          options:
+            A: "Zodat het platform kan zien of het proces leeft en verkeer mag ontvangen."
+            B: "Om de image kleiner te maken."
+            C: "Om secrets te laden."
+            D: "Om de LLM te selecteren."
+          answer: A
+          explanation: "Een healthcheck onderscheidt een levend proces van een bruikbare service; orchestrators en load balancers gebruiken die status."
+          source: "PydanticAI h.11"
+        - id: w6q2
+          type: mcq
+          prompt: "Waarom een immutable image-tag in plaats van latest?"
+          options:
+            A: "latest is altijd sneller."
+            B: "latest is verplicht voor GHCR."
+            C: "Een immutable tag verwijst naar exact een build, zodat je betrouwbaar kunt rollbacken."
+            D: "Een immutable tag verlaagt de kosten."
+          answer: C
+          explanation: "Met een vaste tag of digest weet je precies welke versie draait en kun je exact terug."
+          source: "Claude Code h.9"
+        - id: w6q3
+          type: mcq
+          prompt: "Hoe horen secrets op de VPS te komen?"
+          options:
+            A: "In de Dockerfile."
+            B: "Via een secret store of env-bestand met beperkte rechten, buiten git en image."
+            C: "In de README."
+            D: "In de image-labels."
+          answer: B
+          explanation: "Secrets horen niet in images of git; je injecteert ze at runtime met beperkte leesrechten."
+          source: "Claude Code h.11"
+        - id: w6q4
+          type: mcq
+          prompt: "Wat is een smoke-test na deployment?"
+          options:
+            A: "Een volledige loadtest van een uur."
+            B: "Een statische codeanalyse."
+            C: "Een unit-test van een helperfunctie."
+            D: "Een korte test van het kritieke pad tegen de gedeployde omgeving."
+          answer: D
+          explanation: "Een smoke-test bewijst snel dat de nieuwe versie in de echte omgeving basaal werkt, voordat je verkeer toelaat."
+          source: "Claude Code h.9"
+        - id: w6q5
+          type: mcq
+          prompt: "Wanneer start je een rollback?"
+          options:
+            A: "Bij een healthcheck-fout of een duidelijke SLO-schending na deployment."
+            B: "Alleen als de manager het vraagt."
+            C: "Nooit; je fixt altijd vooruit."
+            D: "Zodra de CI groen is."
+          answer: A
+          explanation: "Rollback is een geplande noodrem met vooraf bepaalde triggers, niet een improvisatie."
+          source: "PydanticAI h.11; Claude Code h.9"
+        - id: w6q6
+          type: open
+          prompt: "Schrijf de stappen van een deployment-runbook: van commit tot rollback. Benoem per stap het bewijs en een mogelijk faalpunt."
+          key_points:
+            - "CI bouwt, test en pusht een immutable image; bewijs is de CI-run en digest."
+            - "De VPS pullt de nieuwe tag en start met de juiste secrets; faalpunt is een ontbrekende env var."
+            - "Healthcheck en smoke-test bewijzen het kritieke pad; faalpunt is een verkeerde versie of netwerk."
+            - "Bij falen: logs, rollback naar de vorige digest, opnieuw verifiëren en een postmortem."
+          model_answer: "CI bouwt en test, pusht een immutable tag naar GHCR en levert de digest als bewijs. De VPS pullt die digest, injecteert secrets uit de secret store en start de compose-stack. Daarna controleer ik health en draai ik de smoke-test op het kritieke pad; faalpunten zijn een ontbrekende env var, een verkeerde tag of een netwerkprobleem. Bij falen lees ik de logs, rol terug naar de vorige digest, verifieer opnieuw en schrijf een korte postmortem met de oorzaak en een preventieve maatregel."
+          source: "PydanticAI h.11; Claude Code h.9"
+    cards:
+      - id: w6c1
+        front: "Wat bewijst een healthcheck?"
+        back: "Of het proces leeft en de service klaar is om verkeer te ontvangen; niet of de businesslogica correct is."
+        source: "PydanticAI h.11"
+      - id: w6c2
+        front: "Waarom immutable image-tags of digests?"
+        back: "Exacte herleidbaarheid en betrouwbare rollback naar de versie die eerder werkte."
+        source: "Claude Code h.9"
+      - id: w6c3
+        front: "Waar staan secrets bij een containerdeploy?"
+        back: "Buiten git en image, geinjecteerd at runtime via een secret store of env-bestand met beperkte rechten."
+        source: "Claude Code h.11"
+      - id: w6c4
+        front: "Wat is een smoke-test?"
+        back: "Een korte test van het kritieke pad tegen de gedeployde omgeving, direct na deployment."
+        source: "Claude Code h.9"
+      - id: w6c5
+        front: "Noem drie rollback-triggers."
+        back: "Healthcheck faalt, smoke-test faalt, of een duidelijke SLO-schending (foutpercentage/latency) na deploy."
+        source: "PydanticAI h.11"

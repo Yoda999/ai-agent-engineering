@@ -1,0 +1,660 @@
+phase: 3
+title: "Fase 3 - Orkestratie: crews, tools en flows die je kunt meten"
+weeks:
+  - week: 12
+    phase: 3
+    title: "CrewAI: rollen, taken en crews"
+    outcome: "Je vertaalt een meerstapsopdracht naar drie scherp afgebakende rollen met expliciete taken, en je bewijst de taakvolgorde en het outputschema met deterministische tests zonder netwerk."
+    reading:
+      - book: "CrewAI in Action"
+        ref: crewai
+        chapters: "1-2"
+        pages: "6-34"
+      - book: "Mastering Claude Code"
+        ref: claudecode
+        chapters: "8"
+        pages: "102-116"
+    build:
+      goal: "Bouw een crew met een onderzoeker, een schrijver en een reviewer die samen een rapport opleveren dat tegen een Pydantic-schema is gevalideerd, en test de crew met een fake LLM."
+      deliverable: "Repo crew-lab met drie agents, drie taken met expliciete context- en schema-afspraken, een reviewer-stap, een fake LLM-fixture, vijf tests en een korte ontwerpnotitie."
+      steps:
+        - "Vertaal de opdracht naar drie rollen met een specifieke rol, een meetbaar doel en een korte backstory; leg vast wie wat oplevert."
+        - "Definieer per taak description, expected_output en agent, en koppel de taken met context=[vorige_taak] tot een expliciete keten."
+        - "Laat de schrijftaak een Report-schema met titel, samenvatting, bronnen en confidence als output_pydantic opleveren."
+        - "Voeg een reviewer-taak toe die het rapport tegen het schema en de bronlijst controleert en bij een tekortkoming teruggeeft."
+        - "Vervang de LLM in tests door een fake die per taak een vaste response geeft; registreer de aanroepen en assert volgorde en schema."
+      done_when:
+        - "De tests draaien zonder netwerk en zonder API-key, en falen niet door timing."
+        - "Een schema-ongeldige response van de fake laat de run gecontroleerd falen met een duidelijke fout."
+        - "De tests bewijzen de volgorde onderzoeker, schrijver, reviewer, niet alleen het eindresultaat."
+    challenge:
+      brief: "Lever een crew met drie rollen die een gevalideerd rapport produceert. De tests bewijzen de taakvolgorde en dat een ongeldige output de run laat falen."
+      verify: "python -m pytest -q"
+      acceptance:
+        - "De crew heeft drie rollen met gescheiden verantwoordelijkheden en een expliciete contextketen."
+        - "Het eindresultaat wordt tegen een Pydantic-schema gevalideerd voordat het als rapport geldt."
+        - "Minstens vijf tests draaien op een fake LLM en bewijzen volgorde, happy path en faalpad."
+      evidence:
+        - "commit-sha"
+        - "testrapport met de vijf tests"
+        - "voorbeeld van een gefaalde validatie met foutmelding"
+    references:
+      - title: "CrewAI documentatie"
+        url: "https://docs.crewai.com/"
+      - title: "Claude Code subagents"
+        url: "https://docs.anthropic.com/en/docs/claude-code/sub-agents"
+    exam:
+      pass_score: 85
+      minutes: 20
+      questions:
+        - id: w12q1
+          type: mcq
+          prompt: "Een crew levert elk rapport in een andere structuur, waardoor de reviewer niets kan vergelijken. Wat is de meest effectieve eerste maatregel?"
+          options:
+            A: "De temperature op 0 zetten en hopen op identieke output."
+            B: "Het expected_output concreet maken en de taak een Pydantic-schema als output_pydantic geven."
+            C: "Een vierde agent toevoegen die het rapport herschrijft."
+            D: "max_iter verhogen zodat de schrijver meer pogingen krijgt."
+          answer: B
+          explanation: "Structuur afdwingen doe je met een expliciet expected_output en een outputschema; meer agents of meer iteraties lossen een contractprobleem niet op."
+          source: "CrewAI in Action h.2, p.24-25, 29-31"
+        - id: w12q2
+          type: mcq
+          prompt: "Hoe zorg je dat de schrijver de onderzoeksresultaten echt als context krijgt?"
+          options:
+            A: "Door beide taken in dezelfde crew te zetten; de crew deelt alles automatisch."
+            B: "Door op de schrijftaak context=[research_task] te zetten; alleen dan wordt de output van die taak als context doorgegeven."
+            C: "Door dezelfde agent aan beide taken te koppelen."
+            D: "Door memory=True op de crew te zetten."
+          answer: B
+          explanation: "De contextparameter maakt de dependency expliciet. Alleen taken in dezelfde crew zetten creëert die koppeling niet; dat is een van de meest gemaakte fouten."
+          source: "CrewAI in Action h.2, p.23-25, 33"
+        - id: w12q3
+          type: mcq
+          prompt: "De output van een taak voldoet niet aan het opgegeven Pydantic-model. Wat doet CrewAI standaard?"
+          options:
+            A: "De taak faalt hard en de crew stopt."
+            B: "CrewAI probeert de output te herformatteren; lukt dat niet, dan geeft de taak ruwe tekst terug."
+            C: "CrewAI verruimt het schema zodat de output toch geldig is."
+            D: "CrewAI herhaalt de taak net zo lang tot de output geldig is."
+          answer: B
+          explanation: "Omdat de taak kan terugvallen op ruwe tekst, moet je zelf valideren en een guardrail of reviewstap toevoegen; reken niet op een harde fout."
+          source: "CrewAI in Action h.2, p.33"
+        - id: w12q4
+          type: mcq
+          prompt: "Wanneer kies je het hiërarchische proces in plaats van het sequentiële?"
+          options:
+            A: "Bij een lineaire pipeline met vaste stappen, want dan is de manager overbodig."
+            B: "Als de routing van de inhoud afhangt of als je een kwaliteitsreview tussen taken wilt, met als prijs extra LLM-calls en latency."
+            C: "Altijd, want hiërarchisch is goedkoper dan sequentieel."
+            D: "Alleen als je geen manager_agent wilt definiëren."
+          answer: B
+          explanation: "Hiërarchisch voegt een manager toe die per taak minstens een extra LLM-call doet. Dat loont bij dynamische routing en review, niet bij een vaste lineaire keten."
+          source: "CrewAI in Action h.2, p.27-29"
+        - id: w12q5
+          type: mcq
+          prompt: "Waarom is een reviewer met een eigen, geïsoleerd contextvenster strenger dan dezelfde agent die zijn eigen werk nakijkt?"
+          options:
+            A: "Omdat de reviewer meer tokens tot zijn beschikking heeft."
+            B: "Omdat de reviewer alleen het aangeleverde artefact en de criteria ziet en niet de redenering van de schrijver, waardoor hij niet meetekent met de aannames."
+            C: "Omdat een reviewer altijd een zwaarder model gebruikt."
+            D: "Omdat de reviewer dezelfde memory deelt en daardoor meer weet."
+          answer: B
+          explanation: "Contextisolatie is de kern: de reviewer beoordeelt het artefact op eigen termen en niet de overtuigingskracht van de redenering erachter."
+          source: "Mastering Claude Code h.8, p.102-105"
+        - id: w12q6
+          type: open
+          prompt: "Je bouwt een crew met een onderzoeker, een schrijver en een reviewer. Beschrijf hoe je met een fake LLM bewijst dat de taakvolgorde klopt en dat een ongeldige output van de schrijver de run gecontroleerd laat falen."
+          key_points:
+            - "Vervang de modelcall door een fake die per taak of prompt een vaste response teruggeeft, zodat de test deterministisch en netwerkloos is."
+            - "Laat de fake elke aanroep met taaknaam en invoer registreren en assert de volgorde onderzoeker, schrijver, reviewer."
+            - "Laat de fake voor de schrijftaak een response geven die niet aan het schema voldoet en assert dat validatie of guardrail de run laat falen."
+            - "Test daarnaast het happy path: een geldige response levert een gevalideerd rapport met alle verplichte velden."
+            - "Test de crewdefinitie als productcode (rollen, context, schema), niet de tekstkwaliteit van het model."
+          model_answer: "Ik injecteer een fake LLM die per taak een vaste response teruggeeft: een onderzoeksamenvatting, een geldig of bewust ongeldig rapport en een reviewuitkomst. De fake logt elke aanroep met de taaknaam, zodat ik kan asserten dat de volgorde onderzoeker, schrijver en reviewer is en dat de schrijver de onderzoeksoutput als context ontving. In een tweede test geeft de fake voor de schrijftaak een response die het Report-schema schendt; ik assert dat de validatie of guardrail de run met een duidelijke fout afbreekt in plaats van een half rapport door te laten. Tot slot test ik het happy path, inclusief alle verplichte velden, en houd ik de crewdefinitie zelf onder test in plaats van de tekstkwaliteit van het model."
+          source: "CrewAI in Action h.2, p.25-27, 33; Mastering Claude Code h.8, p.102-105"
+    cards:
+      - id: w12c1
+        front: "Waarvoor dienen role, goal en backstory in CrewAI?"
+        back: "Role is de identiteit en expertise, goal is een meetbaar resultaat met invoervariabelen, backstory is een korte context van drie tot vijf zinnen die toon en aanpak stuurt."
+        source: "CrewAI in Action h.2, p.19-22"
+      - id: w12c2
+        front: "Hoe maak je een dependency tussen twee taken?"
+        back: "Met context=[vorige_taak] op de volgende taak; alleen dan krijgt die taak de output van de vorige als context. Taken in een crew zetten is niet genoeg."
+        source: "CrewAI in Action h.2, p.23-25"
+      - id: w12c3
+        front: "output_json versus output_pydantic?"
+        back: "Beide nemen een Pydantic-model. output_json geeft een gevalideerde dict, output_pydantic een modelinstantie met typevalidatie; de tokenkosten zijn gelijk."
+        source: "CrewAI in Action h.2, p.29-31"
+      - id: w12c4
+        front: "Waarom mag de manager_agent niet in de agents-lijst staan?"
+        back: "CrewAI geeft een validatiefout. De manager geef je alleen via manager_agent mee; in agents staan de workers aan wie hij kan delegeren."
+        source: "CrewAI in Action h.2, p.28"
+      - id: w12c5
+        front: "Wat levert een subagent op ten opzichte van werk in de hoofdcontext?"
+        back: "De subagent werkt in een eigen contextvenster en retourneert alleen een samenvatting, zodat de hoofdcontext schoon blijft en de review onbevooroordeeld is."
+        source: "Mastering Claude Code h.8, p.102-104"
+
+  - week: 13
+    phase: 3
+    title: "Tools, MCP en memory"
+    outcome: "Je ontwerpt tools en een MCP-server met een expliciet contract, begrenst rechten met een permissiematrix en kiest bewust tussen kortetermijn- en langetermijngeheugen."
+    reading:
+      - book: "CrewAI in Action"
+        ref: crewai
+        chapters: "4-6"
+        pages: "46-75"
+    build:
+      goal: "Bouw een eigen tool, een MCP-server met minimaal twee tools, een korte- en langetermijngeheugen en een permissiematrix die per tool vastlegt wie wat mag."
+      deliverable: "Toolmodule met args_schema, MCP-server, memory-configuratie met scope, permissiematrix in de README, guardrail en tests voor toegestaan en geweigerd gebruik."
+      steps:
+        - "Bouw een class-based tool met BaseTool, een Pydantic args_schema en een _run die fouten als string teruggeeft."
+        - "Exposeer dezelfde functionaliteit via een FastMCP-server en test de tool via de MCP-adapter, inclusief de levensduur van de verbinding."
+        - "Configureer kortetermijngeheugen binnen de run en langetermijngeheugen met een persistente store en scope-paden."
+        - "Stel een permissiematrix op: per tool de actor, de data, read of write, de omgeving en of approval nodig is."
+        - "Test minimaal drie gevallen: een toegestane call, een geweigerde call buiten de scope en een geweigerd pad buiten de toegestane map."
+      done_when:
+        - "De permissiematrix is per tool ingevuld en elke regel heeft een test of een expliciete toelichting."
+        - "Een pad buiten de toegestane map en een schrijfactie zonder recht worden aantoonbaar geweigerd."
+        - "Geheugen overleeft een herstart en is per scope te bevragen zonder data van andere scopes te lekken."
+    challenge:
+      brief: "Lever een MCP-tool plus memory met tests en een aantoonbare permissiematrix: elke rol mag precies wat in de matrix staat, en niets meer."
+      verify: "python -m pytest -q tests/test_permissions.py tests/test_memory.py"
+      acceptance:
+        - "Minstens twee tools zijn via MCP ontsloten en met een test aangeroepen."
+        - "De permissiematrix is per tool en per actor ingevuld en wordt door tests afgedwongen."
+        - "Kortetermijn- en langetermijngeheugen zijn beide getest, inclusief een herstart of nieuwe sessie."
+      evidence:
+        - "commit-sha"
+        - "permissiematrix in de README"
+        - "testrapport van de toegestane en geweigerde calls"
+    references:
+      - title: "CrewAI tools"
+        url: "https://docs.crewai.com/concepts/tools"
+      - title: "Model Context Protocol"
+        url: "https://modelcontextprotocol.io/docs"
+    exam:
+      pass_score: 85
+      minutes: 20
+      questions:
+        - id: w13q1
+          type: mcq
+          prompt: "Waar haalt het model de informatie dat een tool bestaat en wanneer hij hem moet gebruiken?"
+          options:
+            A: "Uit de README van de repo."
+            B: "Uit de toolnaam, de docstring of description en het argumentschema dat de tool zelf levert."
+            C: "Uit de systeemtijd."
+            D: "Uit het geheugen van de crew."
+          answer: B
+          explanation: "Toolnaam, documentatie en schema worden aan het model gegeven. Een vage omschrijving leidt tot verkeerde of ontbrekende tool-calls."
+          source: "CrewAI in Action h.4, p.48-50"
+        - id: w13q2
+          type: mcq
+          prompt: "Een MCP-leestool controleert een pad met realpath en startswith('/data/public'). Waarom is dat onveilig?"
+          options:
+            A: "startswith is te traag voor grote mappen."
+            B: "Omdat /data/public-evil ook met die prefix begint terwijl het buiten de map ligt; vergelijk met commonpath in plaats van startswith."
+            C: "Omdat realpath alleen op Windows werkt."
+            D: "Het is veilig zolang het pad geen spaties bevat."
+          answer: B
+          explanation: "Een prefixvergelijking is geen containment-check. Met realpath en commonpath controleer je of het pad echt binnen de toegestane map valt."
+          source: "CrewAI in Action h.5, p.63-64"
+        - id: w13q3
+          type: mcq
+          prompt: "Je opent een MCPServerAdapter in een with-blok en gebruikt de tools daarna buiten dat blok. Wat gebeurt er?"
+          options:
+            A: "De tools blijven werken zolang de Python-process leeft."
+            B: "Het serverproces is gestopt, waardoor de tools niet meer werken; de verbinding moet open blijven of expliciet worden gestart en gestopt."
+            C: "De adapter start de server automatisch opnieuw bij elke call."
+            D: "De tools worden automatisch gekopieerd naar de crew."
+          answer: B
+          explanation: "De adapter beheert een extern proces; na het sluiten van het blok vervalt de verbinding. Bij meerdere servers gebruik je geneste blokken of expliciet starten en stoppen."
+          source: "CrewAI in Action h.5, p.65-67"
+        - id: w13q4
+          type: mcq
+          prompt: "Wat is het verschil tussen kortetermijn- en langetermijngeheugen in CrewAI?"
+          options:
+            A: "Kortetermijngeheugen staat op schijf, langetermijngeheugen in RAM."
+            B: "Kortetermijngeheugen deelt informatie binnen een run tussen agents; langetermijngeheugen bewaart informatie over runs heen en haalt die semantisch op."
+            C: "Langetermijngeheugen is alleen voor entiteiten en relaties."
+            D: "Er is geen verschil; memory=True zet beide uit."
+          answer: B
+          explanation: "Kortetermijngeheugen is run-scoped en gedeeld binnen de crew; langetermijngeheugen gebruikt embeddings, overleeft nieuwe runs en wordt op relevantie opgehaald."
+          source: "CrewAI in Action h.6, p.68-70"
+        - id: w13q5
+          type: mcq
+          prompt: "Een tool krijgt een time-out van de externe API. Wat is het beste gedrag?"
+          options:
+            A: "Een exception laten opborrelen zodat de hele run stopt."
+            B: "Een lege string teruggeven."
+            C: "Een informatieve foutmelding als string teruggeven, zodat het model kan bijsturen of de fout kan rapporteren."
+            D: "De time-out negeren en het laatste antwoord hergebruiken."
+          answer: C
+          explanation: "Tools horen fouten als tekst terug te geven met soort en context; zo kan de agent een andere strategie kiezen en kun jij de fout loggen."
+          source: "CrewAI in Action h.4, p.54-55"
+        - id: w13q6
+          type: open
+          prompt: "Ontwerp een permissiematrix voor een agent met de tools read_file, search_database en send_email. Benoem per tool de actor, de data, de rechten, de logging en de mate van menselijke goedkeuring."
+          key_points:
+            - "Per tool een rij met actor, dataclassificatie, read of write, omgeving en toegestane scope."
+            - "Least privilege: alleen de rechten die de taak nodig heeft, dus een leesagent krijgt geen schrijfrechten."
+            - "Inputvalidatie en begrenzing (toegestane mappen, querylimieten, rate limits) als onderdeel van de matrix."
+            - "Auditlogging per call met actor, parameters, resultaat en tijd, plus een bewaartermijn."
+            - "Approval-plicht voor onomkeerbare acties zoals send_email, met een dry-run of voorbeeldweergave."
+          model_answer: "Ik maak een matrix met een rij per tool en kolommen voor actor, dataclassificatie, read of write, omgeving, scope, logging en approval. read_file krijgt alleen leesrecht binnen een expliciet toegestane map, met realpath- en commonpath-validatie. search_database krijgt een read-only rol, een maximale rijlimiet en een rate limit per minuut. send_email is een neveneffect-tool: die krijgt een idempotentiesleutel, een dry-run-modus en verplichte menselijke goedkeuring voordat er iets verstuurd wordt. Elke call wordt geaudit met actor, parameters, resultaat en tijd, en de matrixregels worden door tests afgedwongen, inclusief de geweigerde gevallen."
+          source: "CrewAI in Action h.5, p.63-65; h.4, p.46-48"
+    cards:
+      - id: w13c1
+        front: "Waarvoor dient args_schema in een class-based tool?"
+        back: "Het valideert de invoer met een Pydantic-model voordat de tool draait, zodat foutieve argumenten vroeg falen."
+        source: "CrewAI in Action h.4, p.52-53"
+      - id: w13c2
+        front: "stdio versus SSE transport voor MCP?"
+        back: "stdio draait de server als lokaal proces via stdin en stdout; SSE of streamable HTTP verbindt met een remote server, bijvoorbeeld in een container of cloud."
+        source: "CrewAI in Action h.5, p.58"
+      - id: w13c3
+        front: "Waarom is startswith onveilig bij padvalidatie?"
+        back: "Een pad als /data/public-evil deelt de prefix maar ligt buiten de map. Gebruik realpath met commonpath om containment te controleren."
+        source: "CrewAI in Action h.5, p.63-64"
+      - id: w13c4
+        front: "Noem drie risico's van een groeiend agentgeheugen."
+        back: "Memory bloat (trager en duurder ophalen), verouderde informatie die als waarheid wordt gebruikt, en privacygevoelige data zonder verwijderpad."
+        source: "CrewAI in Action h.6, p.74-75"
+      - id: w13c5
+        front: "Hoe begrens je de rechten van een MCP-server?"
+        back: "Expose alleen de nodige tools, valideer en saneer invoer, rate-limit de endpoints, isoleer het netwerk en log elke call."
+        source: "CrewAI in Action h.5, p.63-65"
+
+  - week: 14
+    phase: 3
+    title: "Flows en event-driven orchestration"
+    outcome: "Je bouwt een deterministische flow met expliciete events, begrensde retries, checkpointing en een menselijke goedkeuringsstap die de flow echt laat wachten."
+    reading:
+      - book: "CrewAI in Action"
+        ref: crewai
+        chapters: "8-9, 11"
+        pages: "87-109, 126-135"
+    build:
+      goal: "Bouw een flow die een document verwerkt in stappen met events, een retry- en escalatiepad, checkpointing en een approval-stap voor publicatie."
+      deliverable: "Flow met start-, listen- en routerstappen, getypeerde state, checkpointing, een failure injection-fixture, een approval-event en tests voor het faal- en goedkeuringspad."
+      steps:
+        - "Modelleer de state als Pydantic-model met stap, poging, resultaat en approval-status."
+        - "Bouw de flow met @start, @listen en een @router die op kwaliteit en op het aantal pogingen routeert."
+        - "Begrens retries met een expliciete teller en escaleer naar een review- of approvalstap bij overschrijding."
+        - "Zet checkpointing aan en test hervatten vanuit de laatste checkpoint na een geinjecteerde fout."
+        - "Injecteer met een fake tool een time-out en een blijvende fout; test dat de flow op approval wacht en na goedkeuring verdergaat."
+      done_when:
+        - "Een geinjecteerde toolfout leidt tot een begrensde retry en daarna tot escalatie, niet tot een hang."
+        - "De flow publiceert niets zonder een expliciet approval-event."
+        - "Een herstart vanuit de checkpoint herhaalt geen voltooide, niet-idempotente stap."
+    challenge:
+      brief: "Bewijs dat de flow een toolfout overleeft en correct op menselijke goedkeuring wacht. Beide paden zijn met tests aangetoond, inclusief failure injection."
+      verify: "python -m pytest -q"
+      acceptance:
+        - "De router gebruikt strings die exact overeenkomen met de listeners; een test dekt elke route."
+        - "Retries zijn begrensd en er is een escalatiepad bij overschrijding."
+        - "Er is een test waarin de tool faalt en een test waarin de flow zonder approval niet publiceert."
+      evidence:
+        - "commit-sha"
+        - "testrapport met faal- en approvalpad"
+        - "flowdiagram of overzicht van de events"
+    references:
+      - title: "CrewAI Flows"
+        url: "https://docs.crewai.com/concepts/flows"
+      - title: "CrewAI taken en guardrails"
+        url: "https://docs.crewai.com/concepts/tasks"
+    exam:
+      pass_score: 85
+      minutes: 20
+      questions:
+        - id: w14q1
+          type: mcq
+          prompt: "Een router geeft 'needs_revision' terug, maar de listener luistert op 'need_revision'. Wat gebeurt er?"
+          options:
+            A: "De flow gooit een validatiefout."
+            B: "De stap wordt nooit uitgevoerd, zonder duidelijke fout; de flow eindigt stil of blijft hangen."
+            C: "CrewAI corrigeert de typefout automatisch."
+            D: "De listener wordt alsnog uitgevoerd omdat strings worden genormaliseerd."
+          answer: B
+          explanation: "Routerstrings moeten exact overeenkomen met de @listen-waarden. Een typefout faalt stil, dus test elke route expliciet."
+          source: "CrewAI in Action h.8, p.92"
+        - id: w14q2
+          type: mcq
+          prompt: "Je wilt na een revisie opnieuw evalueren. Waarom is de evaluatiestap direct vanuit de revisiestap aanroepen niet genoeg?"
+          options:
+            A: "Omdat een directe methodcall de listeners en routers van die stap niet activeert; je moet de evaluatiestap op het routerevent laten luisteren met or_."
+            B: "Omdat een directe call altijd een exception geeft."
+            C: "Omdat je anders de state niet kunt lezen."
+            D: "Omdat een flow maar een listener per stap mag hebben."
+          answer: A
+          explanation: "Een directe aanroep voert alleen de body uit; de eventflow wordt niet getriggerd. Met @listen(or_(draft, 'needs_revision')) sluit je de lus correct."
+          source: "CrewAI in Action h.8, p.88-89, 93-94"
+        - id: w14q3
+          type: mcq
+          prompt: "Twee onafhankelijke onderzoekstaken draaien met async_execution=True en delen een agent. Wat is het probleem?"
+          options:
+            A: "Niets; CrewAI serialiseert ze vanzelf."
+            B: "De executor van een agent is single-threaded, dus dit geeft een runtime-fout; elke gelijktijdige taak heeft een eigen agentinstantie nodig."
+            C: "De taken verliezen hun context."
+            D: "De kosten dalen, maar de kwaliteit ook."
+          answer: B
+          explanation: "Parallelle taken mogen geen agentinstantie delen. Geef elke taak een eigen agent en laat de volgende taak via context op beide wachten."
+          source: "CrewAI in Action h.11, p.126-127"
+        - id: w14q4
+          type: mcq
+          prompt: "Wat is het contract van een functie-gebaseerde guardrail in CrewAI?"
+          options:
+            A: "Hij retourneert een bool en stopt de crew bij false."
+            B: "Hij krijgt de TaskOutput en retourneert (bool, str); bij false wordt de melding als feedback voor de retry gebruikt."
+            C: "Hij retourneert een nieuwe prompt."
+            D: "Hij schrijft de output naar de database."
+          answer: B
+          explanation: "De tuple geeft pass of fail plus uitleg; die uitleg gaat terug naar de agent, zodat de retry gericht kan verbeteren."
+          source: "CrewAI in Action h.9, p.102-103, 107-108"
+        - id: w14q5
+          type: mcq
+          prompt: "Wat is het nut van checkpoint=True in een flow?"
+          options:
+            A: "Het versnelt de LLM-calls."
+            B: "Het slaat de state per stap op, zodat je na een fout kunt hervatten vanaf de laatste checkpoint in plaats van alles opnieuw te doen."
+            C: "Het vervangt de approval-stap."
+            D: "Het voorkomt dat een router een typefout maakt."
+          answer: B
+          explanation: "Checkpointing bewaart de state na elke stap, standaard onder ./.checkpoints. Hervatten gebeurt met het state-id; voor meerdere instanties wijs je een gedeelde locatie aan."
+          source: "CrewAI in Action h.8, p.94-95"
+        - id: w14q6
+          type: open
+          prompt: "Ontwerp een flow die een toolfout overleeft en correct op menselijke goedkeuring wacht. Benoem de stappen, de events, de begrenzingen en het bewijs dat je levert."
+          key_points:
+            - "Elke stap is idempotent en er is een checkpoint per stap, zodat hervatten geen dubbele neveneffecten geeft."
+            - "Een toolfout geeft een begrensde retry met backoff; daarna volgt degradatie of escalatie in plaats van stil doorgaan."
+            - "Approval is een expliciet event waar de flow op wacht, met een timeout en een escalatiepad als niemand reageert."
+            - "Failure injection in tests: een fake tool faalt de eerste keer en slaagt daarna; assert retry, eindresultaat en pogingnummer."
+            - "Een test bewijst dat de flow zonder approval niet publiceert en na approval wel, met de state en het event als bewijs."
+          model_answer: "Ik modelleer de flow als een keten van stappen met een getypeerde state: intake, verwerking, kwaliteitscheck, approval en publicatie. Elke stap is idempotent en de flow draait met checkpoint=True, zodat een herstart vanuit het state-id geen voltooide stappen herhaalt. Een toolfout wordt binnen een begrensde retry met backoff afgehandeld; blijft de fout, dan routeert de flow naar een escalatiestap in plaats van stil door te gaan. Publicatie luistert op een expliciet approval-event en de flow blijft wachten tot dat event komt, met een timeout die naar escalatie leidt. In tests injecteer ik met een fake tool eerst een time-out en daarna succes, en assert ik het aantal pogingen en het eindresultaat. Een tweede test toont dat de flow zonder approval niet publiceert en na het approval-event wel."
+          source: "CrewAI in Action h.8, p.92-95; h.9, p.107-108"
+    cards:
+      - id: w14c1
+        front: "Wat doet @router en waar moet je op letten?"
+        back: "Hij retourneert een string die de volgende listener selecteert; die string moet exact gelijk zijn aan de @listen-waarde, anders faalt de route stil."
+        source: "CrewAI in Action h.8, p.92"
+      - id: w14c2
+        front: "Hoe sluit je een revisielus in een flow?"
+        back: "Laat de evaluatiestap luisteren op or_(vorige_stap, 'needs_revision') en begrens het aantal iteraties met een teller."
+        source: "CrewAI in Action h.8, p.93-94"
+      - id: w14c3
+        front: "Wat bewaart checkpoint=True?"
+        back: "De flowstate na elke stap, standaard in ./.checkpoints; hervatten kan met restore_from_state_id."
+        source: "CrewAI in Action h.8, p.94-95"
+      - id: w14c4
+        front: "Wat retourneert een guardrail en wat gebeurt ermee?"
+        back: "(bool, str): bij false wordt de melding als feedback aan de agent gegeven voor een retry, tot max_retries."
+        source: "CrewAI in Action h.9, p.102-103, 107-108"
+      - id: w14c5
+        front: "Waarom mag een gelijktijdige taak geen agent delen?"
+        back: "De executor is single-threaded; twee async-taken op een agent geven een runtime-fout. Elke taak krijgt een eigen agent."
+        source: "CrewAI in Action h.11, p.126-127"
+
+  - week: 15
+    phase: 3
+    title: "Multi-agent testen en observability"
+    outcome: "Je beoordeelt een crew op traject in plaats van alleen op eindtekst, en je maakt per agent zichtbaar wat hij deed, kostte en waar hij vastliep."
+    reading:
+      - book: "CrewAI in Action"
+        ref: crewai
+        chapters: "12-13"
+        pages: "136-170"
+      - book: "Building Production-Ready AI Agents with LlamaIndex"
+        ref: llamaindex
+        chapters: "10"
+        pages: "102-112"
+    build:
+      goal: "Bouw een test- en observabilitylaag voor een crew: trajectory-evaluaties met een rubric, traces en kosten per agent, time-out- en deadlocktests en een runbook."
+      deliverable: "Evalset met 20 trajecten en rubric, trace-export per agent met tokens en kosten, drie stabiliteitstests en een runbook."
+      steps:
+        - "Stel een evalset van 20 representatieve opdrachten samen met per traject de verwachte stappen en een rubric per criterium."
+        - "Leg per agent een trace vast: run-id, taak, tool-calls, tokens, latency, kosten, retries en foutcodes."
+        - "Bouw een evaluator die het traject scoort (juiste tools, volgorde, geen overbodige stappen) en het eindresultaat op kwaliteit beoordeelt."
+        - "Test time-outs en deadlocks met een fake tool die hangt of extreem traag is; assert een begrensde looptijd en een gecontroleerde fout."
+        - "Schrijf een runbook met symptomen, dashboards, escalatie en een replay-procedure voor een mislukte run."
+      done_when:
+        - "De 20 trajecten zijn gescoord met de rubric en de uitslag is reproduceerbaar."
+        - "Het trace- en kostenrapport toont per agent tokens, latency en kosten over dezelfde 20 runs."
+        - "Een hangende tool laat de test binnen de gestelde tijd falen met een duidelijke melding, niet eindeloos wachten."
+    challenge:
+      brief: "Lever 20 gescoorde trajecten met rubric plus een trace- en kostenrapport waaruit blijkt welke agent de bottleneck of de kostenpost is."
+      verify: "python -m pytest -q tests/test_trajectories.py tests/test_timeouts.py"
+      acceptance:
+        - "Twintig trajecten zijn met een vaste rubric gescoord en de scores zijn herhaalbaar."
+        - "Per agent zijn tokens, latency, kosten en retries zichtbaar in een trace of rapport."
+        - "Time-out- en deadlocktests falen gecontroleerd binnen een vaste tijdslimiet."
+      evidence:
+        - "commit-sha"
+        - "trajectrapport met rubric-scores"
+        - "trace- en kostenrapport"
+    references:
+      - title: "LlamaIndex multi-agent"
+        url: "https://docs.llamaindex.ai/en/stable/understanding/agent/multi_agent/"
+      - title: "OpenTelemetry"
+        url: "https://opentelemetry.io/docs/"
+    exam:
+      pass_score: 85
+      minutes: 20
+      questions:
+        - id: w15q1
+          type: mcq
+          prompt: "Waarom is een golden-output test met exacte tekstvergelijking ongeschikt voor een crew?"
+          options:
+            A: "Omdat LLM-output varieert; je vergelijkt beter structuur, lengte en verplichte keywords of eigenschappen."
+            B: "Omdat pytest geen strings kan vergelijken."
+            C: "Omdat golden outputs nooit worden opgeslagen."
+            D: "Omdat een crew geen output teruggeeft."
+          answer: A
+          explanation: "De boektests vergelijken lengte (bijvoorbeeld minstens 80 procent van de referentie) en verplichte keywords, niet de exacte tekst."
+          source: "CrewAI in Action h.12, p.143-144"
+        - id: w15q2
+          type: mcq
+          prompt: "Een crew faalt, maar elke agent werkt solo. Wat is de juiste volgende stap?"
+          options:
+            A: "Alle prompts tegelijk herschrijven."
+            B: "De crew incrementeel opbouwen: eerst een agent, dan twee, om te vinden waar de output tussen agents breekt."
+            C: "Meer tokens geven."
+            D: "Het duurste model kiezen."
+          answer: B
+          explanation: "Isolatietests wijzen de component aan die in interactie faalt; dat is meestal de contextoverdracht of een te ruime taakomschrijving."
+          source: "CrewAI in Action h.12, p.136-137"
+        - id: w15q3
+          type: mcq
+          prompt: "Welke velden maken een logregel van een multi-agent run bruikbaar voor onderzoek?"
+          options:
+            A: "Alleen timestamp en logniveau."
+            B: "Run- of trace-id, agent, taak, tool, tokens, latency en foutcode, in een gestructureerd formaat."
+            C: "De volledige prompt en output in elke regel."
+            D: "Alleen het eindantwoord."
+          answer: B
+          explanation: "Gestructureerde velden maken het mogelijk om een run te reconstrueren en per agent te aggregeren; volledige prompts horen daar niet standaard in."
+          source: "CrewAI in Action h.12, p.137-141"
+        - id: w15q4
+          type: mcq
+          prompt: "Waarom meet je kosten per agent in plaats van alleen per crew?"
+          options:
+            A: "Omdat modelkeuze en max_iter per agent verschillen; alleen per agent zie je welke stap de kosten veroorzaakt en waar je kunt sturen."
+            B: "Omdat tokens per agent gratis zijn."
+            C: "Omdat een crew geen token_usage heeft."
+            D: "Voor de gebruikersinterface."
+          answer: A
+          explanation: "Kosten per agent maken modeltiering en het verlagen van iteraties meetbaar; een crewtotaal verbergt welke stap de rekening veroorzaakt."
+          source: "CrewAI in Action h.12, p.137-141; h.11, p.128-131"
+        - id: w15q5
+          type: mcq
+          prompt: "Wat is het verschil tussen AgentWorkflow-handoffs en een orchestrator die sub-agents als tools aanroept?"
+          options:
+            A: "Handoffs zijn deterministischer omdat de volgorde vastligt."
+            B: "Bij handoffs bepaalt het model binnen can_handoff_to naar wie het overdraagt; bij de orchestrator bepaalt de orchestrator zelf de volgorde via zijn prompt en tools, wat centraler en deterministischer is."
+            C: "Een orchestrator kan geen tools aanroepen."
+            D: "Er is geen verschil."
+          answer: B
+          explanation: "Handoffs zijn modelgestuurd binnen een toegestane graaf; de orchestrator centraliseert de regie en is daardoor beter voorspelbaar."
+          source: "LlamaIndex h.10, p.102-105"
+        - id: w15q6
+          type: open
+          prompt: "Ontwerp een test- en observabilityplan voor een crew van drie agents. Welke trajecten beoordeel je, welke metrics leg je vast en hoe test je time-outs en deadlocks?"
+          key_points:
+            - "Een evalset van representatieve trajecten met een rubric per stap: toolkeuze, volgorde, correctheid en overbodige stappen."
+            - "Per-agent traces met run-id, tokens, latency, kosten, retries en foutcodes, plus aggregatie per agent en per traject."
+            - "Time-out- en deadlocktests met een fake tool die hangt of traag is, met een harde tijdslimiet en een gecontroleerde fout."
+            - "Drempels in CI voor kwaliteit, kosten en p95-latency, zodat een regressie de build laat falen."
+            - "Een runbook met symptomen, dashboards, escalatie en replay van een mislukte run."
+          model_answer: "Ik begin met een evalset van twintig representatieve opdrachten en scoor elk traject met een rubric: heeft de juiste agent de taak gedaan, zijn de tools correct gekozen, klopt de volgorde en zijn er overbodige stappen? Daarnaast beoordeel ik het eindresultaat op kwaliteit. Per agent leg ik een trace vast met run-id, tokens, latency, kosten, retries en foutcodes, en ik aggregeer die per agent en per traject, zodat de bottleneck en de kostenpost zichtbaar worden. Time-outs en deadlocks test ik met een fake tool die hangt of extreem traag is, met een harde tijdslimiet: de test moet binnen die limiet falen met een duidelijke melding. In CI zet ik drempels op kwaliteit, kosten en p95-latency. Tot slot schrijf ik een runbook met symptomen, dashboards, escalatie en een replay-procedure."
+          source: "CrewAI in Action h.12, p.136-145; LlamaIndex h.10, p.102-105"
+    cards:
+      - id: w15c1
+        front: "Waarom test je gedrag en structuur in plaats van exacte tekst?"
+        back: "LLM-output varieert; je assert schema, lengte, verplichte keywords en drempels, niet de letterlijke tekst."
+        source: "CrewAI in Action h.12, p.141-143"
+      - id: w15c2
+        front: "Wat is isolation testing bij een crew?"
+        back: "De crew incrementeel opbouwen (een agent, dan twee) om te vinden welke agent of welke overdracht het probleem veroorzaakt."
+        source: "CrewAI in Action h.12, p.136-137"
+      - id: w15c3
+        front: "Welke velden horen in een gestructureerde agent-logregel?"
+        back: "Timestamp, niveau, run-id, agent, taak, tool, tokens, latency en foutcode."
+        source: "CrewAI in Action h.12, p.137-139"
+      - id: w15c4
+        front: "Wat is een trajectory-evaluatie?"
+        back: "Het beoordelen van de gekozen stappen en tool-calls tegen een rubric, naast het beoordelen van het eindresultaat."
+        source: "CrewAI in Action h.12, p.141-144"
+      - id: w15c5
+        front: "Handoff versus orchestrator in LlamaIndex?"
+        back: "Bij een handoff kiest het model de volgende agent binnen can_handoff_to; bij een orchestrator roept een centrale agent specialisten als tools aan in een bepaalde volgorde."
+        source: "LlamaIndex h.10, p.102-105"
+
+  - week: 16
+    phase: 3
+    title: "DSPy: meten en optimaliseren"
+    outcome: "Je vervangt promptgevoel door een meetbare pipeline met signatures, een metric en een optimizer, en je bewijst de winst op 50 cases met een CI-regressiepoort."
+    reading:
+      - book: "Programming with DSPy"
+        ref: dspy
+        chapters: "1-8, 18"
+        pages: "4-62, 131-149"
+    build:
+      goal: "Bouw een DSPy-programma met heldere signatures en modules, een metric die zowel scoort als demonstreert, en een gecompileerde variant die aantoonbaar beter of goedkoper is."
+      deliverable: "DSPy-pipeline, metric, compile-script, before/after-rapport op 50 cases, opgeslagen gecompileerd programma en een CI-regressietaak."
+      steps:
+        - "Schrijf twee of drie signatures met duidelijke input- en outputvelden en een instructie in de docstring."
+        - "Componeer de modules in een eigen Module met predictoren in __init__, zodat de optimizer ze kan vinden."
+        - "Schrijf een metric die bij trace=None een score geeft en bij een trace beslist of het voorbeeld als demo mag dienen."
+        - "Compileer met een geschikte optimizer op een trainset en meet baseline en gecompileerd op dezelfde 50 cases."
+        - "Vergelijk kwaliteit en kosten, sla het gecompileerde programma op en zet een regressiedrempel in CI."
+      done_when:
+        - "De metric, de split en de optimizer-instellingen zijn vastgelegd en herhaalbaar."
+        - "Het rapport toont baseline en gecompileerd op dezelfde 50 cases met kwaliteit, tokens en kosten."
+        - "CI faalt wanneer de score onder de afgesproken drempel zakt."
+    challenge:
+      brief: "Toon met cijfers aan dat je pipeline minstens 10 procent kwaliteitswinst boekt, of 30 procent kostenreductie bij gelijke kwaliteit, op een vaste set van 50 cases."
+      verify: "python -m pytest -q && python scripts/compare.py --report reports/dspy-before-after.md"
+      acceptance:
+        - "De vergelijking gebruikt dezelfde 50 cases en dezelfde metric voor baseline en gecompileerd."
+        - "De winst is minstens 10 procent kwaliteit of 30 procent kosten bij gelijke kwaliteit, met de berekening erbij."
+        - "Het gecompileerde programma is opgeslagen en de CI-regressiepoort is actief."
+      evidence:
+        - "commit-sha"
+        - "before/after-rapport met de berekening"
+        - "CI-run met de regressiepoort"
+    references:
+      - title: "DSPy documentatie"
+        url: "https://dspy.ai/"
+      - title: "DSPy optimizers"
+        url: "https://dspy.ai/learn/optimization/optimizers/"
+    exam:
+      pass_score: 85
+      minutes: 20
+      questions:
+        - id: w16q1
+          type: mcq
+          prompt: "Wat doet de docstring in een class-based DSPy-signature?"
+          options:
+            A: "Niets; alleen de veldnamen tellen."
+            B: "Hij is de natuurlijke-taalinstructie die DSPy in de prompt opneemt, naast de input- en outputvelden."
+            C: "Hij wordt de metric."
+            D: "Hij bepaalt het model."
+          answer: B
+          explanation: "De signature is het contract: velden plus een instructie. Een scherpe docstring en duidelijke veldomschrijvingen sturen het model beter dan een string-signature."
+          source: "Programming with DSPy h.3, p.15-17"
+        - id: w16q2
+          type: mcq
+          prompt: "Waarom heeft een DSPy-metric een trace-parameter?"
+          options:
+            A: "Voor logging tijdens de evaluatie."
+            B: "Bij trace=None scoort de metric; bij een meegegeven trace beslist de returnwaarde of het voorbeeld als demonstratie mag dienen bij bootstrapping."
+            C: "Om de kosten per call te meten."
+            D: "Omdat Python dat verplicht maakt."
+          answer: B
+          explanation: "De dubbele rol verklaart waarom een metric zowel een float voor evaluatie als een bool voor de demonstratiekeuze kan teruggeven."
+          source: "Programming with DSPy h.7, p.44-45"
+        - id: w16q3
+          type: mcq
+          prompt: "Je metric levert per voorbeeld tekstuele feedback en je ziet veel verschillende faalvormen. Welke optimizer past het best?"
+          options:
+            A: "BootstrapFewShot, want die voegt alleen demonstraties toe."
+            B: "COPRO, want die optimaliseert alleen de instructietekst willekeurig."
+            C: "GEPA, omdat die de feedback per voorbeeld gebruikt voor reflectieve prompt-evolutie."
+            D: "dspy.Parallel, want die draait sneller."
+          answer: C
+          explanation: "GEPA leest tekstuele feedback en gebruikt reflectie om instructies gericht te verbeteren; dat vraagt wel een sterke reflection-LM en een metric die score plus feedback teruggeeft."
+          source: "Programming with DSPy h.8, p.56-58"
+        - id: w16q4
+          type: mcq
+          prompt: "Je wilt de kosten verlagen zonder kwaliteitsverlies. Wat is de meest directe DSPy-aanpak?"
+          options:
+            A: "Een duurder model kiezen en de temperature verhogen."
+            B: "Compileren met een sterk teacher-model voor de demonstraties en serveren met een goedkoper model, terwijl de metric gelijk blijft."
+            C: "Altijd meer en langere demonstraties toevoegen."
+            D: "De metric versoepelen zodat de score stijgt."
+          answer: B
+          explanation: "BootstrapFewShot met teacher_settings laat een sterk model demonstraties genereren; het gecompileerde programma draait daarna op een goedkoper model. De metric moet gelijk blijven, anders vergelijk je appels met peren."
+          source: "Programming with DSPy h.8, p.52-54, 61-62"
+        - id: w16q5
+          type: mcq
+          prompt: "Wat is een eerlijke CI-poort voor een gecompileerd DSPy-programma?"
+          options:
+            A: "Exacte string match op een enkel voorbeeld."
+            B: "Een vaste regressieset met een drempel (bijvoorbeeld niet onder 95 procent van de baseline) plus structurele tests, die de build laat falen bij een daling."
+            C: "Alleen code coverage boven de 90 procent."
+            D: "Alleen de p95-latency."
+          answer: B
+          explanation: "Unit-tests bewaken structuur, de regressieset met drempel bewaakt kwaliteit; samen voorkomen ze dat een compile of modelwissel stil achteruitgaat."
+          source: "Programming with DSPy h.18, p.134-136"
+        - id: w16q6
+          type: open
+          prompt: "Je hebt 50 cases en een compileerbare DSPy-pipeline. Beschrijf hoe je aantoont dat de optimizer minstens 10 procent kwaliteitswinst boekt, of 30 procent kostenreductie bij gelijke kwaliteit."
+          key_points:
+            - "Split de 50 cases in train, dev en test en gebruik de testset nooit tijdens het compileren."
+            - "Leg de metric, de split, de seeds en de modelversie vast, zodat de vergelijking herhaalbaar is."
+            - "Meet baseline en gecompileerd op exact dezelfde testset, met kwaliteit, tokens en kosten per case."
+            - "Bereken de winst expliciet als relatieve verbetering en herhaal de meting om ruis door LLM-variantie te scheiden."
+            - "Borg de uitkomst met een opgeslagen gecompileerd programma en een CI-regressiedrempel."
+          model_answer: "Ik verdeel de 50 cases in een trainset, een devset voor de optimizer-keuze en een testset die ik niet aanraak tijdens het compileren. Ik leg de metric, de split, de seeds en de modelversie vast. Daarna meet ik de baseline en het gecompileerde programma op exact dezelfde testset en leg per case kwaliteit, tokens en kosten vast. De winst bereken ik relatief: kwaliteit als het verschil in gemiddelde score, kosten als het verschil in kosten per case bij een kwaliteit die niet lager is dan de baseline. Omdat LLM-output varieert, herhaal ik de meting en rapporteer ik de spreiding. Tot slot sla ik het gecompileerde programma op en zet ik een CI-drempel die een daling blokkeert, zodat de winst niet eenmalig is."
+          source: "Programming with DSPy h.7, p.44-51; h.8, p.52-62; h.18, p.134-136"
+    cards:
+      - id: w16c1
+        front: "Uit welke drie onderdelen bestaat een DSPy-signature?"
+        back: "Inputvelden, outputvelden en een natuurlijke-taalinstructie in de docstring, met optionele veldomschrijvingen."
+        source: "Programming with DSPy h.3, p.15-17"
+      - id: w16c2
+        front: "Waarom predictoren in __init__ maken?"
+        back: "De optimizer wandelt de moduleboom af via named_predictors; predictoren die pas in forward() ontstaan, worden niet gevonden."
+        source: "Programming with DSPy h.5, p.34-35"
+      - id: w16c3
+        front: "Wat doet BootstrapFewShot?"
+        back: "Het draait het programma op trainingsvoorbeelden, bewaart geslaagde traces als demonstraties en zet die in de prompt."
+        source: "Programming with DSPy h.8, p.52-54"
+      - id: w16c4
+        front: "Wat betekent compile once, serve many?"
+        back: "De optimalisatie kost eenmalig API-calls; je slaat het gecompileerde programma op en serveert het daarna zonder optimalisatiekosten."
+        source: "Programming with DSPy h.8, p.52, 61-62"
+      - id: w16c5
+        front: "Waarom een vaste regressieset in CI?"
+        back: "Om te voorkomen dat een nieuwe compile of modelwissel stil kwaliteit verliest; de build faalt onder de afgesproken drempel."
+        source: "Programming with DSPy h.18, p.134-136"

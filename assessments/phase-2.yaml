@@ -1,0 +1,659 @@
+phase: 2
+title: "Fase 2 - Kennis: retrieval, RAG en evaluatie"
+weeks:
+  - week: 7
+    phase: 2
+    title: "Tokens, context en ingestion"
+    outcome: "Je bouwt een reproduceerbare ingestion-pipeline en onderbouwt chunking en metadata met metingen in plaats van gevoel."
+    reading:
+      - book: "Building Production-Ready AI Agents with LlamaIndex"
+        ref: llamaindex
+        chapters: "1, 3"
+        pages: "6-15, 27-38"
+    build:
+      goal: "Ingesteer een corpus van minstens drie formaten (PDF, Markdown, HTML) tot genormaliseerde nodes met metadata, en meet de effecten van chunkgrootte en overlap."
+      deliverable: "Pipeline met documenthash, metadata, chunkmatrix (256/512/1024 tokens) en een chunkrapport."
+      steps:
+        - "Verzamel een representatief corpus van minimaal 30 documenten in drie formaten."
+        - "Normaliseer tekst en behoud metadata: bron, sectie, datum, versie en toegangsniveau."
+        - "Draai de chunkmatrix en meet aantal chunks, gemiddelde lengte en duplicate ratio."
+        - "Maak de pipeline idempotent met een documenthash en een manifest."
+        - "Schrijf een kort besluit: welke chunkstrategie en waarom, met cijfers."
+      done_when:
+        - "Hetzelfde corpus twee keer ingesten levert geen duplicaten op."
+        - "Elke node is herleidbaar naar bron en sectie."
+        - "Het chunkrapport onderbouwt de keuze met metingen."
+    challenge:
+      brief: "Lever een ingestion-pipeline die reproduceerbaar is, updates en verwijderingen aankan en waarvan elke node traceerbaar is naar de bron."
+      verify: "python -m pytest -q"
+      acceptance:
+        - "Idempotente ingest is getest met een tweede run."
+        - "Update en delete van een document werken aantoonbaar."
+        - "Metadata en chunkkeuze zijn gedocumenteerd met cijfers."
+      evidence:
+        - "commit-sha"
+        - "chunkrapport"
+        - "manifest of ingest-log"
+    references:
+      - title: "LlamaIndex ingestion"
+        url: "https://docs.llamaindex.ai/en/stable/module_guides/loading/"
+      - title: "LlamaIndex node parsers"
+        url: "https://docs.llamaindex.ai/en/stable/module_guides/loading/node_parsers/"
+    exam:
+      pass_score: 85
+      minutes: 20
+      questions:
+        - id: w7q1
+          type: mcq
+          prompt: "Wat is een token in de context van een LLM?"
+          options:
+            A: "Een heel woord."
+            B: "Een subwoordelement dat de tokenizer als eenheid gebruikt."
+            C: "Een regel tekst."
+            D: "Een document."
+          answer: B
+          explanation: "Tokenizers splitsen tekst in subwoord-eenheden; tokens bepalen contextgebruik en kosten."
+          source: "LlamaIndex h.1, p.6-15"
+        - id: w7q2
+          type: mcq
+          prompt: "Wat is de kernafweging bij chunkgrootte?"
+          options:
+            A: "Kleine chunks zijn preciezer maar missen context; grote chunks geven context maar meer ruis en kosten."
+            B: "Groter is altijd beter."
+            C: "Kleiner is altijd beter."
+            D: "Chunkgrootte heeft geen invloed op retrieval."
+          answer: A
+          explanation: "De juiste chunkgrootte balanceert precisie, context en kosten; je meet dit op je eigen corpus."
+          source: "LlamaIndex h.3, p.27-38"
+        - id: w7q3
+          type: mcq
+          prompt: "Waarom voeg je metadata toe aan nodes?"
+          options:
+            A: "Om de embeddings korter te maken."
+            B: "Om filtering, citaties en toegangscontrole mogelijk te maken."
+            C: "Om het model te trainen."
+            D: "Om tokens te besparen."
+          answer: B
+          explanation: "Metadata maakt gerichte filtering en herleidbare citaties mogelijk, en is de basis voor toegangscontrole."
+          source: "LlamaIndex h.3"
+        - id: w7q4
+          type: mcq
+          prompt: "Wat is een misvatting over het context window?"
+          options:
+            A: "Het is een harde limiet op tokens."
+            B: "Het bepaalt mede de kosten."
+            C: "Het is hetzelfde als langetermijngeheugen."
+            D: "Het beïnvloedt wat het model kan zien."
+          answer: C
+          explanation: "Een context window is werkgeheugen per call, geen persistente memory; informatie moet expliciet worden opgeslagen en opgehaald."
+          source: "LlamaIndex h.1"
+        - id: w7q5
+          type: mcq
+          prompt: "Hoe maak je ingestion idempotent bij herhaalde runs?"
+          options:
+            A: "Door de pipeline elke keer te resetten."
+            B: "Door een documenthash of versie als sleutel te gebruiken en bestaande nodes bij te werken."
+            C: "Door willekeurige IDs te genereren."
+            D: "Door alleen nieuwe bestanden te bekijken."
+          answer: B
+          explanation: "Een stabiele sleutel per document(versie) voorkomt duplicaten en maakt gerichte updates mogelijk."
+          source: "LlamaIndex h.3"
+        - id: w7q6
+          type: open
+          prompt: "Ontwerp een ingestion-pipeline voor 10.000 documenten die regelmatig wijzigen en verwijderd worden. Noem vier mechanismen en hoe je ze test."
+          key_points:
+            - "Stabiele documentsleutel plus hash/versie voor idempotentie en wijzigingsdetectie."
+            - "Een manifest of state store die toegevoegde, gewijzigde en verwijderde documenten bijhoudt."
+            - "Metadata (bron, sectie, datum, toegang) voor filtering en citaties."
+            - "Tests voor dubbele ingest, update, delete en een volledige rebuild."
+          model_answer: "Elk document krijgt een stabiele sleutel en een hash van de inhoud. Een manifest houdt bij welke versie is geindexeerd, zodat een tweede run alleen wijzigingen verwerkt. Verwijderingen markeer ik in het manifest en ruim ik op in de index. Metadata zorgt voor filtering en citaties. Ik test dubbele ingest, een update, een delete en een volledige rebuild vanaf nul, en vergelijk aantallen en checksums."
+          source: "LlamaIndex h.3"
+    cards:
+      - id: w7c1
+        front: "Wat is een token?"
+        back: "Een subwoord-eenheid uit de tokenizer; bepaalt contextgebruik en kosten."
+        source: "LlamaIndex h.1"
+      - id: w7c2
+        front: "Wat is de chunkgrootte-afweging?"
+        back: "Klein: preciezer maar minder context. Groot: meer context maar meer ruis, latency en kosten."
+        source: "LlamaIndex h.3"
+      - id: w7c3
+        front: "Waarom metadata op nodes?"
+        back: "Voor filtering, citaties, herleidbaarheid en toegangscontrole."
+        source: "LlamaIndex h.3"
+      - id: w7c4
+        front: "Is een context window hetzelfde als geheugen?"
+        back: "Nee. Het is werkgeheugen per call; persistente memory moet je apart opslaan en ophalen."
+        source: "LlamaIndex h.1"
+      - id: w7c5
+        front: "Hoe test je idempotente ingestion?"
+        back: "Twee keer ingesten en vergelijken op aantallen/checksums, plus update-, delete- en rebuild-tests."
+        source: "LlamaIndex h.3"
+
+  - week: 8
+    phase: 2
+    title: "Embeddings, vectorstores en indexversie"
+    outcome: "Je kiest embeddings en een vectorstore op basis van een benchmark, en je index is versioneerbaar en herbouwbaar."
+    reading:
+      - book: "Building Production-Ready AI Agents with LlamaIndex"
+        ref: llamaindex
+        chapters: "4"
+        pages: "39-49"
+    build:
+      goal: "Vergelijk twee embeddingmodellen op dertig queries, bouw een persistente index en maak herbouw en versiebeheer expliciet."
+      deliverable: "Benchmarkrapport (recall@5, latency, kosten), persisted index met versie-ID en een rebuild-script."
+      steps:
+        - "Kies twee embeddingmodellen met verschillende dimensies en prijs."
+        - "Bouw een kleine gelabelde queryset: dertig vragen met de juiste bron."
+        - "Meet recall@5 en latency per model; noteer dimensie en kosten per 1.000 chunks."
+        - "Persisteer de index met een embeddingmodel-versie en corpusversie."
+        - "Test een volledige rebuild en een rollback naar de vorige indexversie."
+      done_when:
+        - "De benchmark is reproduceerbaar met een script."
+        - "De index draagt een versie en het model waarmee hij is gebouwd."
+        - "Een rebuild vanaf nul is getest."
+    challenge:
+      brief: "Bewijs met een benchmark welke embedding- en indexkeuze je maakt, en dat je index-versie kunt herbouwen en terugrollen."
+      verify: "python -m pytest -q"
+      acceptance:
+        - "Recall@5 en latency zijn gemeten voor twee modellen."
+        - "De index heeft een versie en een rebuild-script."
+        - "Een rollback naar de vorige index is getest."
+      evidence:
+        - "benchmarkrapport"
+        - "commit-sha"
+        - "rebuild- en rollbacklog"
+    references:
+      - title: "LlamaIndex embeddings"
+        url: "https://docs.llamaindex.ai/en/stable/module_guides/models/embeddings/"
+      - title: "LlamaIndex vector stores"
+        url: "https://docs.llamaindex.ai/en/stable/module_guides/storing/vector_stores/"
+    exam:
+      pass_score: 85
+      minutes: 20
+      questions:
+        - id: w8q1
+          type: mcq
+          prompt: "Wat representeert een embedding?"
+          options:
+            A: "Een lijst met trefwoorden."
+            B: "Een vector in een ruimte waarin semantisch vergelijkbare teksten dicht bij elkaar liggen."
+            C: "Een gecomprimeerde PDF."
+            D: "Een SQL-tabel."
+          answer: B
+          explanation: "Embeddings zetten tekst om in vectoren; gelijkenis in die ruimte benadert semantische gelijkenis."
+          source: "LlamaIndex h.4, p.39-49"
+        - id: w8q2
+          type: mcq
+          prompt: "Waarom normaliseer je vectoren vaak voor cosine similarity?"
+          options:
+            A: "Dan is de dot product gelijk aan cosine similarity en zijn scores vergelijkbaar."
+            B: "Dan worden de vectoren korter."
+            C: "Dan is er geen index nodig."
+            D: "Dan werkt BM25 beter."
+          answer: A
+          explanation: "Bij genormaliseerde vectoren volstaat een dot product; scores blijven vergelijkbaar over queries."
+          source: "LlamaIndex h.4"
+        - id: w8q3
+          type: mcq
+          prompt: "Wat is recall@k?"
+          options:
+            A: "Het percentage queries waarbij de juiste bron in de top-k resultaten zit."
+            B: "Het aantal documenten in de index."
+            C: "De gemiddelde embeddingsdimensie."
+            D: "De latentie van de index."
+          answer: A
+          explanation: "Recall@k meet of de relevante bron binnen de eerste k resultaten wordt gevonden."
+          source: "LlamaIndex h.11; h.4"
+        - id: w8q4
+          type: mcq
+          prompt: "Wat gebeurt er als je van embeddingmodel wisselt zonder de index te herbouwen?"
+          options:
+            A: "Niets, vectoren zijn uitwisselbaar."
+            B: "De index wordt sneller."
+            C: "Query- en documentvectoren komen uit verschillende ruimtes, dus de resultaten worden onbetrouwbaar."
+            D: "De kosten dalen."
+          answer: C
+          explanation: "Vectoren van verschillende modellen leven in verschillende ruimtes; je moet opnieuw embedden en indexeren."
+          source: "LlamaIndex h.4"
+        - id: w8q5
+          type: mcq
+          prompt: "Waarom een indexversie en een rebuild-script?"
+          options:
+            A: "Om de prompt korter te maken."
+            B: "Om reproduceerbaar te kunnen herbouwen en terug te rollen bij een slechte index."
+            C: "Om embeddings goedkoper te maken."
+            D: "Om de context window te vergroten."
+          answer: B
+          explanation: "Een versie koppelt index, corpus en embeddingmodel; daarmee kun je reproduceren en rollbacken."
+          source: "LlamaIndex h.4"
+        - id: w8q6
+          type: open
+          prompt: "Je moet 1 miljoen chunks op een 4GB-VPS doorzoekbaar maken. Welke criteria wegen het zwaarst bij de keuze van een vectorstore en waarom?"
+          key_points:
+            - "Geheugen- en schijfvoetafdruk passend bij 4GB, inclusief het model en de applicatie."
+            - "Recall/latency bij de verwachte querybelasting en het aantal chunks."
+            - "Operationele eenvoud: back-up, restore, upgrades en monitoring."
+            - "Toekomstpad naar schaal (managed service of horizontaal schalen) zonder herontwerp."
+          model_answer: "Ik weeg eerst geheugen en schijf: een in-process index of embedded store moet samen met de rest in 4GB passen. Daarna meet ik recall en p95-latency bij realistische querybelasting. Operationele eenvoud is cruciaal: back-up, restore, upgrades en monitoring moeten beheersbaar zijn. Ten slotte kies ik een pad dat later naar een managed of horizontaal schaalbare store kan zonder de applicatie te herschrijven. Ik bewijs de keuze met een benchmark en een restore-test."
+          source: "LlamaIndex h.4 en h.13"
+    cards:
+      - id: w8c1
+        front: "Wat is een embedding?"
+        back: "Een vectorrepresentatie van tekst waarin semantisch vergelijkbare inhoud dicht bij elkaar ligt."
+        source: "LlamaIndex h.4"
+      - id: w8c2
+        front: "Waarom vectoren normaliseren?"
+        back: "Dan volstaat een dot product voor cosine similarity en zijn scores vergelijkbaar."
+        source: "LlamaIndex h.4"
+      - id: w8c3
+        front: "Wat meet recall@k?"
+        back: "Het aandeel queries waarbij de juiste bron binnen de top-k resultaten valt."
+        source: "LlamaIndex h.11"
+      - id: w8c4
+        front: "Wat gebeurt er bij een embeddingmodelwissel zonder rebuild?"
+        back: "Query- en documentvectoren komen uit verschillende ruimtes; retrieval wordt onbetrouwbaar."
+        source: "LlamaIndex h.4"
+      - id: w8c5
+        front: "Wat moet een indexversie vastleggen?"
+        back: "Corpusversie, embeddingmodel, chunkstrategie en bouwtijd, zodat je kunt reproduceren en rollbacken."
+        source: "LlamaIndex h.4"
+
+  - week: 9
+    phase: 2
+    title: "Retrieval: hybrid, rerank en filters"
+    outcome: "Je combineert semantisch en lexicaal zoeken, herrangschikt resultaten en levert antwoorden met herleidbare citaties."
+    reading:
+      - book: "Building Production-Ready AI Agents with LlamaIndex"
+        ref: llamaindex
+        chapters: "5, 6"
+        pages: "50-59, 60-70"
+    build:
+      goal: "Bouw een RAG-service met hybride retrieval, reranker, metadatafilters en citaties; meet de meerwaarde per component."
+      deliverable: "RAG-endpoint met citaties, filters en een ablatie-rapport (vector-only, hybrid, hybrid+rerank)."
+      steps:
+        - "Implementeer vector-only als baseline en meet recall@5 en latency."
+        - "Voeg BM25 toe en combineer scores; meet het verschil."
+        - "Voeg een reranker toe en meet kwaliteit tegen de extra latency en kosten."
+        - "Implementeer metadatafilters en een 'ik weet het niet'-pad bij onvoldoende bewijs."
+        - "Schrijf een ablatie-rapport met een duidelijke keuze."
+      done_when:
+        - "Elk antwoord bevat bronverwijzingen naar de gebruikte chunks."
+        - "Zonder voldoende bewijs geeft de service een expliciete 'onvoldoende bewijs'-uitkomst."
+        - "Het ablatie-rapport toont de meerwaarde per component."
+    challenge:
+      brief: "Bewijs dat je RAG-service aantoonbaar beter retrievalt dan de vector-only baseline en dat citaties en filters correct werken."
+      verify: "python -m pytest -q"
+      acceptance:
+        - "Hybride retrieval verslaat de baseline op recall@5 of MRR."
+        - "Metadatafilters en citaties zijn getest."
+        - "Er is een getest 'geen antwoord'-pad."
+      evidence:
+        - "ablatie-rapport"
+        - "testrapport"
+        - "voorbeeldantwoord met citaties"
+    references:
+      - title: "LlamaIndex retrieval"
+        url: "https://docs.llamaindex.ai/en/stable/module_guides/querying/retriever/"
+      - title: "LlamaIndex postprocessors"
+        url: "https://docs.llamaindex.ai/en/stable/module_guides/querying/node_postprocessors/"
+    exam:
+      pass_score: 85
+      minutes: 20
+      questions:
+        - id: w9q1
+          type: mcq
+          prompt: "Waarom hybride zoeken (vector + BM25)?"
+          options:
+            A: "BM25 is altijd beter."
+            B: "Semantisch zoeken mist exacte termen; lexicaal zoeken mist parafrases; samen dekken ze meer."
+            C: "Het is goedkoper dan vector-only."
+            D: "Het verwijdert de noodzaak van een index."
+          answer: B
+          explanation: "Hybride combineert exacte termmatching met semantische gelijkenis en verhoogt daardoor de recall."
+          source: "LlamaIndex h.5, p.50-59"
+        - id: w9q2
+          type: mcq
+          prompt: "Wat is de prijs van een reranker?"
+          options:
+            A: "Extra latency en rekenkracht per query."
+            B: "Een grotere context window."
+            C: "Minder citaties."
+            D: "Geen enkele; het is gratis."
+          answer: A
+          explanation: "Een reranker draait een extra model over kandidaten; dat kost latency en geld en moet je meten."
+          source: "LlamaIndex h.5"
+        - id: w9q3
+          type: mcq
+          prompt: "Waarvoor gebruik je metadatafilters in retrieval?"
+          options:
+            A: "Om de prompt korter te maken."
+            B: "Om alleen relevante of toegestane documenten te doorzoeken, bijvoorbeeld per tenant of datum."
+            C: "Om embeddings te normaliseren."
+            D: "Om het model te fine-tunen."
+          answer: B
+          explanation: "Filters beperken de zoekruimte op gestructureerde kenmerken en zijn essentieel voor toegangscontrole."
+          source: "LlamaIndex h.5"
+        - id: w9q4
+          type: mcq
+          prompt: "Wat is een bekende beperking van alleen top-k retrieval?"
+          options:
+            A: "Het levert altijd te weinig resultaten."
+            B: "Het kan relevante context missen en tegelijk ruis ophalen; k is geen kwaliteitsgarantie."
+            C: "Het werkt niet met vectoren."
+            D: "Het kan niet met metadata omgaan."
+          answer: B
+          explanation: "Top-k is een vaste snede; de kwaliteit hangt af van de vraag, de index en de scoring, niet alleen van k."
+          source: "LlamaIndex h.5"
+        - id: w9q5
+          type: mcq
+          prompt: "Waarom citaties in een RAG-antwoord?"
+          options:
+            A: "Om het antwoord langer te maken."
+            B: "Om het model te trainen."
+            C: "Om het antwoord controleerbaar en herleidbaar te maken."
+            D: "Om de kosten te verlagen."
+          answer: C
+          explanation: "Citaties maken het antwoord verifieerbaar en helpen bij foutanalyse en vertrouwen."
+          source: "LlamaIndex h.6"
+        - id: w9q6
+          type: open
+          prompt: "Ontwerp retrieval voor juridische documenten met vertrouwelijke dossiers per klant. Noem vier maatregelen en hoe je ze test."
+          key_points:
+            - "Verplichte tenant- en toegangsfilters op metadata, afgedwongen buiten het model."
+            - "Hybride retrieval plus reranker, met een minimum bewijsdrempel voor een antwoord."
+            - "Citaties naar document en sectie, met documentversie en datum."
+            - "Tests op datalekken, filterbypass, geen-bewijs-pad en auditlogging."
+          model_answer: "Elke chunk krijgt tenant- en toegangsmetadata. De retrievallaag dwingt het filter af op basis van de geauthenticeerde gebruiker, niet op basis van modeloutput. Ik gebruik hybride retrieval met reranker en een bewijsdrempel; onder de drempel volgt een expliciet 'onvoldoende bewijs'. Antwoorden citeren document, sectie en versie. Ik test datalekken met queries van een andere tenant, pogingen tot filterbypass, het geen-bewijs-pad en de auditlogging."
+          source: "LlamaIndex h.5 en h.6"
+    cards:
+      - id: w9c1
+        front: "Waarom hybride retrieval?"
+        back: "Vector zoekt semantisch, BM25 zoekt exact; samen dekken ze parafrasen en specifieke termen beter."
+        source: "LlamaIndex h.5"
+      - id: w9c2
+        front: "Wat kost een reranker?"
+        back: "Extra latency en rekenkracht per query; de kwaliteitswinst moet je meten."
+        source: "LlamaIndex h.5"
+      - id: w9c3
+        front: "Waarvoor dienen metadatafilters?"
+        back: "Beperken van de zoekruimte op tenant, datum, bron of toegangsniveau."
+        source: "LlamaIndex h.5"
+      - id: w9c4
+        front: "Wat is de beperking van top-k?"
+        back: "Een vaste snede garandeert geen relevantie; je kunt context missen en ruis ophalen."
+        source: "LlamaIndex h.5"
+      - id: w9c5
+        front: "Waarom citaties?"
+        back: "Controleerbaarheid, herleidbaarheid en betere foutanalyse."
+        source: "LlamaIndex h.6"
+
+  - week: 10
+    phase: 2
+    title: "RAG-evaluatie"
+    outcome: "Je meet retrieval en generatie met een gelabelde set, drempels en een CI-poort in plaats van losse indrukken."
+    reading:
+      - book: "Building Production-Ready AI Agents with LlamaIndex"
+        ref: llamaindex
+        chapters: "11"
+        pages: "113-122"
+      - book: "Programming with DSPy"
+        ref: dspy
+        chapters: "7"
+        pages: "44-51"
+      - book: "Mastering LangChain for Python Development"
+        ref: langchain
+        chapters: "7"
+        pages: "76-91"
+    build:
+      goal: "Bouw een eval-harness met vijftig gelabelde vragen, retrieval- en antwoordmetrics, een foutanalyse en een CI-drempel."
+      deliverable: "Golden set van 50 items, eval-script, rapport met recall@k/MRR/faithfulness/correctheid en een CI-gate."
+      steps:
+        - "Stel een golden set samen: vraag, verwachte bron(nen), verwacht antwoord en moeilijkheidsgraad."
+        - "Meet retrieval (recall@k, MRR) en generatie (faithfulness, answer correctness)."
+        - "Categoriseer fouten: retrieval, context, generatie, weigering, onduidelijke vraag."
+        - "Zet drempels en laat CI falen bij regressie."
+        - "Schrijf een evaluatierapport met de grootste foutoorzaken en vervolgacties."
+      done_when:
+        - "De golden set is geversioneerd en deugdelijk gelabeld."
+        - "CI faalt aantoonbaar bij een kunstmatige regressie."
+        - "Het rapport bevat per foutcategorie een voorbeeld en een actie."
+    challenge:
+      brief: "Bewijs met een geversioneerde golden set en CI-drempels dat je RAG-kwaliteit meet en regressies blokkeert."
+      verify: "python -m pytest -q"
+      acceptance:
+        - "Minstens 50 gelabelde items."
+        - "Retrieval- en antwoordmetrics zijn apart gerapporteerd."
+        - "CI faalt bij een geinjecteerde regressie."
+      evidence:
+        - "eval-rapport met cijfers"
+        - "commit-sha"
+        - "CI-run met regressiedemo"
+    references:
+      - title: "LlamaIndex evaluation"
+        url: "https://docs.llamaindex.ai/en/stable/module_guides/evaluating/"
+      - title: "DSPy metrics"
+        url: "https://dspy.ai/learn/evaluation/metrics/"
+    exam:
+      pass_score: 85
+      minutes: 20
+      questions:
+        - id: w10q1
+          type: mcq
+          prompt: "Waarom retrieval en generatie apart meten?"
+          options:
+            A: "Omdat ze verschillende foutoorzaken hebben en je anders niet weet waar je moet ingrijpen."
+            B: "Omdat generatie altijd perfect is."
+            C: "Omdat retrieval geen fouten maakt."
+            D: "Om de prompt korter te maken."
+          answer: A
+          explanation: "Slechte antwoorden kunnen door retrieval of door generatie komen; gescheiden metrics wijzen de oorzaak aan."
+          source: "LlamaIndex h.11"
+        - id: w10q2
+          type: mcq
+          prompt: "Wat meet faithfulness?"
+          options:
+            A: "Of het antwoord consistent is met de opgehaalde context."
+            B: "Of het antwoord snel is."
+            C: "Of de index groot genoeg is."
+            D: "Of het model goedkoper is."
+          answer: A
+          explanation: "Faithfulness controleert of beweringen door de geboden context worden ondersteund, los van of het antwoord 'waar' is."
+          source: "LlamaIndex h.11"
+        - id: w10q3
+          type: mcq
+          prompt: "Wat is een goede golden set?"
+          options:
+            A: "Alleen makkelijke vragen die het systeem al haalt."
+            B: "Een representatieve mix van makkelijke, moeilijke en randgevalvragen met gelabelde bronnen."
+            C: "Duizend willekeurige prompts zonder labels."
+            D: "Alleen vragen van de ontwikkelaar."
+          answer: B
+          explanation: "De set moet de echte verdeling en randgevallen representeren, anders meet je alleen wat al werkt."
+          source: "DSPy h.7"
+        - id: w10q4
+          type: mcq
+          prompt: "Wat is een bekende bias van LLM-as-judge?"
+          options:
+            A: "De judge is altijd strenger dan een mens."
+            B: "De judge kan voorkeur hebben voor lange antwoorden of voor zijn eigen modelstijl."
+            C: "De judge kan geen tekst lezen."
+            D: "De judge werkt alleen met embeddings."
+          answer: B
+          explanation: "Judges vertonen positie-, lengte- en stijlbias; calibreer daarom tegen menselijke labels."
+          source: "DSPy h.7"
+        - id: w10q5
+          type: mcq
+          prompt: "Hoe voorkom je dat een prompt- of modelwijziging stilzwijgend kwaliteit verliest?"
+          options:
+            A: "Door alleen handmatig te testen."
+            B: "Door een eval in CI met vaste drempels en een geversioneerde dataset."
+            C: "Door de prompt nooit te wijzigen."
+            D: "Door de kosten te verlagen."
+          answer: B
+          explanation: "Een regressiepoort in CI met een vaste dataset maakt kwaliteitsverlies zichtbaar voor release."
+          source: "DSPy h.7 en h.18"
+        - id: w10q6
+          type: open
+          prompt: "Ontwerp een evaluatieplan voor een RAG-assistent. Noem dataset, metrics, drempels en cadans."
+          key_points:
+            - "Een representatieve, geversioneerde golden set met bronlabels en randgevallen."
+            - "Gescheiden retrievalmetrics (recall@k, MRR) en generatiemetrics (faithfulness, correctheid)."
+            - "Vaste drempels en een CI-poort die regressies blokkeert."
+            - "Periodieke hercalibratie en foutanalyse, plus een menselijke steekproef."
+          model_answer: "Ik bouw een geversioneerde golden set die de echte vraagverdeling en randgevallen dekt, met bronlabels. Ik meet retrieval met recall@k en MRR en generatie met faithfulness en answer correctness. Per metric stel ik drempels in en CI blokkeert een release bij regressie. Wekelijks analyseer ik fouten per categorie en eens per maand calibreer ik de judge tegen een menselijke steekproef, waarna ik de set of drempels bijstel."
+          source: "LlamaIndex h.11; DSPy h.7"
+    cards:
+      - id: w10c1
+        front: "Waarom retrieval en generatie apart meten?"
+        back: "Om de foutoorzaak te vinden: ophalen versus antwoorden."
+        source: "LlamaIndex h.11"
+      - id: w10c2
+        front: "Wat meet faithfulness?"
+        back: "Of het antwoord wordt ondersteund door de opgehaalde context."
+        source: "LlamaIndex h.11"
+      - id: w10c3
+        front: "Wat moet een golden set bevatten?"
+        back: "Een representatieve mix van vragen, inclusief moeilijke en randgevallen, met gelabelde bronnen en antwoorden."
+        source: "DSPy h.7"
+      - id: w10c4
+        front: "Noem twee biases van LLM-as-judge."
+        back: "Lengtebias en stijl-/modelvoorkeur; calibreer tegen menselijke labels."
+        source: "DSPy h.7"
+      - id: w10c5
+        front: "Hoe blokkeer je een kwaliteitsregressie in CI?"
+        back: "Met een vaste eval-dataset, drempels per metric en een failing job bij overschrijding."
+        source: "DSPy h.18"
+
+  - week: 11
+    phase: 2
+    title: "Observability, latency en kosten"
+    outcome: "Je maakt de RAG-service meetbaar in productie: traces, p95-latency, cache en kosten per query."
+    reading:
+      - book: "Building Production-Ready AI Agents with LlamaIndex"
+        ref: llamaindex
+        chapters: "12, 13"
+        pages: "123-145"
+      - book: "Mastering LangChain for Python Development"
+        ref: langchain
+        chapters: "10"
+        pages: "116-128"
+    build:
+      goal: "Instrumenteer de RAG-service end-to-end en bewijs met een loadtest dat latency en kosten binnen je budget blijven."
+      deliverable: "Traces per stap, dashboard, cache met invalidatie, kostenmodel en een loadtestrapport met p95 en foutpercentage."
+      steps:
+        - "Voeg tracing toe over retrieval, rerank, generatie en cache."
+        - "Bouw een dashboard met p50/p95-latency, foutpercentage, tokens en kosten per query."
+        - "Voeg caching toe met een expliciete invalidatiestrategie."
+        - "Doe een loadtest met 50 gelijktijdige gebruikers en meet de grenzen."
+        - "Schrijf een SLO-voorstel met alerts en een rollback-/schaalbesluit."
+      done_when:
+        - "Elke query is als trace terug te vinden met alle stappen."
+        - "Het dashboard toont p95 en kosten per query."
+        - "De loadtest is herhaalbaar en het rapport noemt de bottleneck."
+    challenge:
+      brief: "Bewijs met een herhaalbare loadtest en traces dat je de latency- en kosten-SLO van de RAG-service haalt of onderbouwd bijstelt."
+      verify: "python -m pytest -q -m loadtest"
+      acceptance:
+        - "Traces dekken retrieval, rerank, generatie en cache."
+        - "Loadtestrapport met p95, foutpercentage en kosten per query."
+        - "Er is een onderbouwd SLO- en schaalbesluit."
+      evidence:
+        - "loadtestrapport"
+        - "dashboard-screenshot of export"
+        - "SLO-besluit in de README"
+    references:
+      - title: "LlamaIndex observability"
+        url: "https://docs.llamaindex.ai/en/stable/module_guides/observability/"
+      - title: "OpenTelemetry"
+        url: "https://opentelemetry.io/docs/"
+    exam:
+      pass_score: 85
+      minutes: 20
+      questions:
+        - id: w11q1
+          type: mcq
+          prompt: "Waarom is p95 latency belangrijker dan het gemiddelde?"
+          options:
+            A: "Het gemiddelde verbergt de ervaring van de traagste gebruikers."
+            B: "p95 is altijd lager."
+            C: "Het gemiddelde is niet te berekenen."
+            D: "p95 meet alleen fouten."
+          answer: A
+          explanation: "Een gemiddelde maskeert uitschieters; p95 toont wat een aanzienlijk deel van de gebruikers ervaart."
+          source: "LlamaIndex h.12"
+        - id: w11q2
+          type: mcq
+          prompt: "Waarom is cache-invalidatie essentieel bij RAG?"
+          options:
+            A: "Anders blijft verouderde of niet-toegestane context terugkomen."
+            B: "Anders wordt de cache te groot."
+            C: "Anders werkt de embedding niet."
+            D: "Anders stijgt de temperature."
+          answer: A
+          explanation: "Documenten en rechten wijzigen; zonder invalidatie serveer je verouderde of onjuiste antwoorden."
+          source: "LlamaIndex h.13"
+        - id: w11q3
+          type: mcq
+          prompt: "Wat is een span in tracing?"
+          options:
+            A: "Een enkele stap of operatie binnen een trace, met timing en attributen."
+            B: "Het volledige dashboard."
+            C: "Een database-index."
+            D: "Een prompttemplate."
+          answer: A
+          explanation: "Spans vormen de knopen in een trace en tonen per stap latency, status en metadata."
+          source: "LlamaIndex h.12"
+        - id: w11q4
+          type: mcq
+          prompt: "Hoe bereken je kosten per query verantwoord?"
+          options:
+            A: "Alleen de prijs van het taalmodel."
+            B: "Tokens en calls van model, embeddings en reranker plus infra, gedeeld door het aantal queries."
+            C: "De grootte van de index."
+            D: "Het aantal gebruikers."
+          answer: B
+          explanation: "Kosten zitten in meerdere componenten; je moet alle variabele kosten toerekenen."
+          source: "LlamaIndex h.13"
+        - id: w11q5
+          type: mcq
+          prompt: "Wat is het doel van een loadtest vóór je schaalt?"
+          options:
+            A: "Bewijzen dat de code mooi is."
+            B: "De grenzen en de bottleneck vinden bij realistische belasting, zodat je onderbouwd kunt schalen."
+            C: "De kosten altijd verlagen."
+            D: "De prompt verbeteren."
+          answer: B
+          explanation: "Een loadtest kwantificeert waar het systeem breekt en welke resource de bottleneck is."
+          source: "LlamaIndex h.13"
+        - id: w11q6
+          type: open
+          prompt: "Stel een SLO voor een RAG-service voor: noem twee SLO's, de meting, een alert en een actie bij schending."
+          key_points:
+            - "Latency-SLO: p95 < drempel, gemeten over een rollend venster van requests."
+            - "Beschikbaarheid/kwaliteit-SLO: foutpercentage of faithfulness boven een minimum."
+            - "Alert bij burn rate of opeenvolgende schendingen, met duidelijke eigenaar."
+            - "Actie: rollback, schalen of retrieval/generatie bijstellen, gevolgd door een postmortem."
+          model_answer: "Ik kies twee SLO's: p95-latency onder een vaste drempel en een beschikbaarheids- of kwaliteitsdrempel, bijvoorbeeld foutpercentage onder 1% en faithfulness boven 0,9. Ik meet over een rollend venster van requests, met dashboards per stap. Een alert gaat af bij een aanhoudende burn rate of drie opeenvolgende schendingen. De actie is rollback of opschalen, afhankelijk van de bottleneck, gevolgd door een korte postmortem en een preventieve maatregel."
+          source: "LlamaIndex h.12 en h.13"
+    cards:
+      - id: w11c1
+        front: "Waarom p95 en niet het gemiddelde?"
+        back: "Het gemiddelde verbergt trage uitschieters; p95 toont de ervaring van een groot deel van de gebruikers."
+        source: "LlamaIndex h.12"
+      - id: w11c2
+        front: "Waarom cache-invalidatie bij RAG?"
+        back: "Documenten en rechten wijzigen; zonder invalidatie serveer je verouderde of onbevoegde context."
+        source: "LlamaIndex h.13"
+      - id: w11c3
+        front: "Wat is een span?"
+        back: "Een enkele stap in een trace met timing, status en attributen."
+        source: "LlamaIndex h.12"
+      - id: w11c4
+        front: "Welke kosten tellen mee per RAG-query?"
+        back: "Modeltokens, embeddings, reranker, cache en infrastructuur, toegerekend per query."
+        source: "LlamaIndex h.13"
+      - id: w11c5
+        front: "Wat levert een loadtest op?"
+        back: "De grenzen en de bottleneck bij realistische belasting, als basis voor schaal- en kostenbeslissingen."
+        source: "LlamaIndex h.13"

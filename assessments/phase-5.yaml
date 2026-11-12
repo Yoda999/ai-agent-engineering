@@ -1,0 +1,565 @@
+phase: 5
+title: "Fase 5 - Capstone: van businessidee naar productie en verdediging"
+weeks:
+  - week: 21
+    phase: 5
+    title: "Businessidee naar architectuur"
+    outcome: "Je vertaalt een gevalideerd probleem naar een capstone-specificatie met een kostenmodel, een onderbouwde architectuur en meetbare succescriteria."
+    reading:
+      - book: "Mastering Claude Code"
+        ref: claudecode
+        chapters: "12"
+        pages: "142-149"
+      - book: "PydanticAI: Building Production-Grade AI Agents"
+        ref: pydanticai
+        chapters: "12"
+        pages: "114-121"
+    build:
+      goal: "Vertaal een echt probleem naar een onderbouwde capstone: interview tien potentiële klanten, kwantificeer het probleem en de unit economics, en leg architectuur en schaalkeuze vast in ADR's."
+      deliverable: "Capstone-dossier met geanonimiseerde interviewverslagen, probleemstelling, unit-economics-model, capstone-spec, drie ADR's en een onderbouwde schaalkeuze."
+      steps:
+        - "Voer tien klantinterviews met een vaste vragenlijst; leg per interview het probleem, de huidige workaround, de frequentie en de bereidheid tot betalen vast."
+        - "Schrijf een probleemstelling met doelgroep, huidige kosten en een eerste meetbaar succescriterium."
+        - "Modelleer de unit economics: prijs, kosten per run (tokens, tools, retries, handmatige review), infra en break-even."
+        - "Vergelijk drie schaalopties (single VPS, queue met workers, managed platform) op load, taakduur, SLO's, onderhoud, kosten en lock-in."
+        - "Schrijf de capstone-spec met probleem, doelgroep, scope, niet-scope, architectuur, datamodel en meetbare acceptatiecriteria."
+        - "Leg de belangrijkste keuzes vast in drie ADR's met context, alternatieven en gevolgen."
+      done_when:
+        - "De spec is door minstens twee buitenstaanders gelezen en bevat geen onmeetbare doelen."
+        - "Het kostenmodel herleidt de prijs tot kosten per run en een break-even-volume."
+        - "De schaalkeuze is expliciet en heeft een herzieningstrigger."
+        - "Er staan geen secrets of klantnamen in het dossier."
+    challenge:
+      brief: "Lever een capstone-spec met probleem, doelgroep, kostenmodel, architectuur en meetbare succescriteria, plus een onderbouwde schaalkeuze."
+      verify: "bash scripts/verify-capstone.sh"
+      acceptance:
+        - "De spec benoemt probleem, doelgroep en minstens twee meetbare succescriteria."
+        - "Het kostenmodel bevat tokens, tools, retries, handmatige review en infra."
+        - "Drie ADR's beschrijven alternatieven en gevolgen."
+        - "De schaalkeuze is onderbouwd met load, SLO's, onderhoud en kosten."
+      evidence:
+        - "tien geanonimiseerde interviewverslagen"
+        - "capstone-spec en ADR's in de repo"
+        - "kostenmodel met aannames en break-even"
+        - "commit-sha van het dossier"
+    references:
+      - title: "PydanticAI documentatie"
+        url: "https://ai.pydantic.dev/"
+      - title: "Architecture Decision Records"
+        url: "https://adr.github.io/"
+      - title: "Claude Code documentatie"
+        url: "https://code.claude.com/docs/en/overview"
+    exam:
+      pass_score: 85
+      minutes: 20
+      questions:
+        - id: w21q1
+          type: mcq
+          prompt: "Anthropic onderzocht 400.000 Claude Code-sessies. Wat blijkt het sterkst samen te hangen met een geslaagde sessie?"
+          options:
+            A: "De programmeertaal en het framework dat de gebruiker kiest."
+            B: "Domeinexpertise en een goed begrip van het probleem."
+            C: "Het aantal tokens dat in de systeem-prompt staat."
+            D: "Of de gebruiker het duurste model selecteert."
+          answer: B
+          explanation: "Domeinexpertise is de belangrijkste voorspeller; het verschil tussen software- en andere beroepen is ongeveer vijf procentpunt. Ervaren gebruikers geven bovendien meer werk per instructie."
+          source: "Claude Code h.12, p.143-144"
+        - id: w21q2
+          type: mcq
+          prompt: "De support-case combineert een confidence-score met een escalatiepad. Waarom is dat beter dan altijd automatisch antwoorden?"
+          options:
+            A: "Omdat een confidence-score bewijst dat het antwoord feitelijk juist is."
+            B: "Omdat escalatie de kosten per ticket altijd verlaagt."
+            C: "Omdat het model dan geen tools meer nodig heeft."
+            D: "Omdat een lage confidence een bruikbaar signaal is om een mens te laten beslissen in plaats van te gokken."
+          answer: D
+          explanation: "De case valideert confidence en routeert onzekere gevallen naar een mens. Confidence is een routeringssignaal, geen bewijs van correctheid; de drempel en het escalatiepad moeten apart worden geëvalueerd."
+          source: "PydanticAI h.12, p.114-115"
+        - id: w21q3
+          type: mcq
+          prompt: "Wanneer is een multi-agent-architectuur een verdedigbare keuze?"
+          options:
+            A: "Altijd; meer agents leveren altijd betere resultaten."
+            B: "Alleen als elke agent hetzelfde model en dezelfde tools gebruikt."
+            C: "Als het werk opdeelbaar is in gespecialiseerde subtaken die parallel kunnen lopen, en de winst opweegt tegen extra calls, latency en kosten."
+            D: "Als je geen evaluatie wilt doen."
+          answer: C
+          explanation: "Specialisatie en parallelisme leveren winst als het werk opdeelbaar is. Is dat niet zo, dan betaal je coördinatie en extra modelcalls zonder dat de kwaliteit evenredig stijgt."
+          source: "PydanticAI h.12, p.117-118"
+        - id: w21q4
+          type: mcq
+          prompt: "Welke maatregel verkleint de vendor lock-in van je capstone het meest?"
+          options:
+            A: "Werkstromen platform-agnostisch documenteren, alternatieven openhouden en in overdraagbare vaardigheden investeren."
+            B: "Alle prompts en hooks in een proprietary DSL vastleggen."
+            C: "Alleen tool-specifieke commando's in de README zetten."
+            D: "Geen documentatie maken, zodat niemand afhankelijk wordt van verkeerde aannames."
+          answer: A
+          explanation: "Lock-in zit in workflows, configuratie, skills en teamkennis. Platform-agnostische documentatie, een combinatie van tools en transferable vaardigheden verkleinen de migratiekosten."
+          source: "Claude Code h.12, p.146"
+        - id: w21q5
+          type: mcq
+          prompt: "Welk succescriterium voor de capstone is meetbaar en uitkomstgericht?"
+          options:
+            A: "De agent gebruikt een moderne LLM en een populair framework."
+            B: "De code heeft meer dan duizend regels."
+            C: "De demo ziet er professioneel uit."
+            D: "Van honderd representatieve tickets wordt minstens 90 procent correct gerouteerd, met p95-latency onder vijf seconden en kosten onder twee cent per ticket."
+          answer: D
+          explanation: "Een bruikbaar criterium noemt een populatie, een meetbare uitkomst en een drempel. Activiteiten zoals frameworkkeuze of regelaantal zeggen niets over de uitkomst."
+          source: "PydanticAI h.12, p.114-115"
+        - id: w21q6
+          type: open
+          prompt: "Onderbouw de schaalkeuze voor je capstone: single VPS, queue met workers of een managed platform. Noem minstens vier factoren die je weegt en hoe je elke factor meet of onderbouwt."
+          key_points:
+            - "Verwachte vraag en piekconcurrentie, gemeten met een representatieve loadtest of expliciete aannames."
+            - "Taakduur en faalgedrag: lange of herstartbare taken vragen een queue en durable execution in plaats van een synchrone request."
+            - "SLO's en failure domains: één VPS is eenvoudig maar heeft één storingspunt; een managed platform kost meer maar neemt beheer en elasticiteit over."
+            - "Unit economics en lock-in: kosten per run, infra, onderhoud, exitkosten en de afhankelijkheid van één leverancier."
+            - "Operationele capaciteit en een herzieningstrigger: wie draait de nacht, en bij welke load of SLO-schending herzie je de keuze?"
+          model_answer: "Ik begin bij de vraag: hoeveel gelijktijdige runs, hoe lang duren ze en wat is de piek? Die schat ik met een loadtest of expliciete aannames. Lange, herstartbare taken zet ik in een queue met workers, zodat een crash geen request verliest. Voor de SLO's weeg ik failure domains: één VPS is goedkoop en simpel, maar één storing legt alles stil; een managed platform kost meer en vermindert beheer, maar vergroot de lock-in. Daarna reken ik de unit economics door: kosten per run, infra, onderhoud en exitkosten. Ten slotte leg ik de keuze vast in een ADR met een herzieningstrigger, bijvoorbeeld meer dan twintig gelijktijdige taken of een p95 boven de SLO."
+          source: "PydanticAI h.12, p.121; Claude Code h.12, p.146-148"
+    cards:
+      - id: w21c1
+        front: "Wat is het doel van klantinterviews vóór de architectuur?"
+        back: "Het probleem, de huidige workaround, de frequentie en de bereidheid tot betalen valideren, zodat je bouwt wat de doelgroep echt nodig heeft."
+        source: "Claude Code h.12, p.143-144"
+      - id: w21c2
+        front: "Welke kosten horen minimaal in het unit-economics-model?"
+        back: "Tokens en modelcalls, toolcalls, retries, handmatige review of escalatie, infra en onderhoud; daaruit volgt de break-even."
+        source: "PydanticAI h.12, p.114-115"
+      - id: w21c3
+        front: "Wat leg je in een ADR vast?"
+        back: "Context, de beslissing, overwogen alternatieven en de gevolgen of risico's, plus wanneer je de beslissing herziet."
+        source: "Claude Code h.12, p.146-147"
+      - id: w21c4
+        front: "Wanneer kies je queue met workers boven een synchrone VPS-request?"
+        back: "Bij lange of herstartbare taken en pieken: de queue ontkoppelt vraag en verwerking en ondersteunt durable execution."
+        source: "PydanticAI h.12, p.121"
+      - id: w21c5
+        front: "Wat maakt een succescriterium meetbaar?"
+        back: "Een populatie, een uitkomst, een drempel en een meetmoment; niet een activiteit of een mening."
+        source: "PydanticAI h.12, p.114-115"
+
+  - week: 22
+    phase: 5
+    title: "Capstone sprint 1: verticale slice"
+    outcome: "Je levert een werkende end-to-end slice met een getypeerde agent, een eval-harness en een CI-run die kwaliteit afdwingt."
+    reading:
+      - book: "PydanticAI: Building Production-Grade AI Agents"
+        ref: pydanticai
+        chapters: "15"
+        pages: "148-161"
+      - book: "Building Production-Ready AI Agents with LlamaIndex"
+        ref: llamaindex
+        chapters: "11"
+        pages: "113-122"
+    build:
+      goal: "Bouw een dunne verticale slice van invoer tot uitvoer: één getypeerde agent, één echte tool, opslag en een eval-harness die in CI groen is."
+      deliverable: "Werkende slice met getypeerd output_type, één echte tool, opslag, minstens tien eval-cases, CI-workflow en een korte demo-opname."
+      steps:
+        - "Teken de slice: één gebruiker, één invoer, één agent, één tool, één uitvoer en opslag; zet alles daarbuiten expliciet buiten scope."
+        - "Bouw de agent met een expliciet output_type en een versieerbare instructie; mock alleen de buitenrand."
+        - "Sluit één echte tool en opslag aan en bewijs het pad met een integratietest."
+        - "Bouw de eval-harness met minstens tien cases: happy path, randgevallen, safety en domeinvragen."
+        - "Zet de eval in CI met een drempel en deterministische modellen; faalt de drempel, dan faalt de build."
+        - "Neem een demo op en schrijf het eval-rapport met scores per categorie en de gebruikte drempels."
+      done_when:
+        - "De slice werkt end-to-end op een schone checkout met één commando."
+        - "De eval-harness draait in CI zonder echte modelkosten of netwerkafhankelijkheid."
+        - "Het eval-rapport toont scores per categorie en de gebruikte drempels."
+        - "De demo laat invoer, agentstap, toolcall en uitvoer zien."
+    challenge:
+      brief: "Demonstreer de verticale slice en lever het eval-rapport plus het bewijs van een groene CI-run die bij een regressie aantoonbaar faalt."
+      verify: "bash scripts/verify-slice.sh"
+      acceptance:
+        - "De slice is end-to-end en heeft een getypeerd output_type."
+        - "Minstens tien eval-cases dekken happy path, randgevallen en safety."
+        - "CI faalt aantoonbaar bij een drempel- of regressieschending."
+        - "Het eval-rapport bevat scores en een korte duiding."
+      evidence:
+        - "demo-opname of demo-URL"
+        - "CI-run-URL"
+        - "eval-rapport met scores per categorie"
+        - "commit-sha van de slice"
+    references:
+      - title: "Pydantic Evals documentatie"
+        url: "https://ai.pydantic.dev/evals/"
+      - title: "RAGAS documentatie"
+        url: "https://docs.ragas.io/"
+      - title: "LlamaIndex evaluatie"
+        url: "https://docs.llamaindex.ai/en/stable/module_guides/evaluating/"
+    exam:
+      pass_score: 85
+      minutes: 20
+      questions:
+        - id: w22q1
+          type: mcq
+          prompt: "Pydantic Evals kent vier abstracties. Welke rol heeft een Evaluator?"
+          options:
+            A: "Hij bepaalt de scoring: hij vergelijkt de output met het verwachte resultaat via exacte match, LLM-as-judge, semantische similarity of eigen code."
+            B: "Hij verzamelt de testcases in een dataset."
+            C: "Hij voert de agent uit en schrijft de rapportage."
+            D: "Hij vervangt het taalmodel tijdens de test."
+          answer: A
+          explanation: "Dataset verzamelt cases, Experiment draait de taak en produceert een rapport, Evaluator levert de scorelogica. Verwar de vier abstracties niet."
+          source: "PydanticAI h.15, p.148"
+        - id: w22q2
+          type: mcq
+          prompt: "Je evalueert een klantgerichte agent met vrije tekst en wilt toon, volledigheid en accuratesse beoordelen. Welke evaluator past het best, mits je de kosten en subjectiviteit beheerst?"
+          options:
+            A: "EqualsExpected, omdat vrije tekst altijd exact te vergelijken is."
+            B: "Alleen een snapshot van de lengte van het antwoord."
+            C: "LLMJudge met een expliciete rubric en de expected output."
+            D: "Geen evaluator; laat gebruikers klagen."
+          answer: C
+          explanation: "LLMJudge is het meest flexibel voor kwaliteit en toon, maar is duurder en subjectiever. Daarom: een expliciete rubric, een steekproef en aanvulling met deterministische checks."
+          source: "PydanticAI h.15, p.152-153"
+        - id: w22q3
+          type: mcq
+          prompt: "Een RAG-agent scoort hoog op faithfulness maar laag op context recall. Wat is de meest waarschijnlijke diagnose?"
+          options:
+            A: "De agent hallucineert veel en verzint feiten."
+            B: "De vectorstore is te groot."
+            C: "De antwoorden zijn trouw aan de opgehaalde context, maar de retriever mist relevante documenten, waardoor het antwoord onvolledig is."
+            D: "De LLM is te duur."
+          answer: C
+          explanation: "Faithfulness meet of claims door de context worden gedekt; context recall meet of alle benodigde informatie is opgehaald. Hoog faithfulness plus lage recall wijst op onvolledige retrieval, niet op hallucinatie."
+          source: "LlamaIndex h.11, p.114-115"
+        - id: w22q4
+          type: mcq
+          prompt: "Een promptwijziging verhoogt de gemiddelde eval-score, maar twee kritieke cases falen. Wat is de juiste releasebeslissing?"
+          options:
+            A: "Deployen, want het gemiddelde is gestegen."
+            B: "De release blokkeren, de regressie op de kritieke cases onderzoeken en pas daarna opnieuw beoordelen."
+            C: "De twee cases uit de dataset verwijderen."
+            D: "De drempel verlagen tot de twee cases passen."
+          answer: B
+          explanation: "Een gemiddelde verbergt regressies. Kritieke cases horen een harde drempel te hebben; een verslechtering daarvan blokkeert de release tot de oorzaak bekend is."
+          source: "PydanticAI h.15, p.157-158"
+        - id: w22q5
+          type: mcq
+          prompt: "Waarom evalueer je bij een getypeerde agent ook individuele velden, zoals de categorie, in plaats van alleen het volledige antwoord?"
+          options:
+            A: "Omdat veldniveau-evaluatie het model goedkoper maakt."
+            B: "Omdat Pydantic geen volledige objecten kan valideren."
+            C: "Omdat LLMJudge alleen naar losse velden kan kijken."
+            D: "Omdat een antwoord overtuigend kan klinken terwijl één classificatie fout is; veldniveau lokaliseert de fout en maakt gerichte verbetering mogelijk."
+          answer: D
+          explanation: "Bij structured output kun je per veld een evaluator hangen, bijvoorbeeld category accuracy. Dat maakt fouten zichtbaar die in een algemene tekstscore verdwijnen."
+          source: "PydanticAI h.15, p.156-157"
+        - id: w22q6
+          type: open
+          prompt: "Ontwerp de eval-harness voor je verticale slice. Benoem de dataset, de evaluatoren, de drempels en het bewijs dat je in CI levert."
+          key_points:
+            - "Dataset met representatieve cases: happy path, randgevallen, safety en domeinvragen, versioned en met ground truth waar nodig."
+            - "Per veld of eigenschap de juiste evaluator: exacte match voor deterministische velden, LLMJudge met rubric voor vrije tekst, custom code voor domeinregels."
+            - "Drempels per categorie en overall, plus een harde eis op kritieke cases; leg de baseline vast."
+            - "CI draait deterministisch met TestModel of FunctionModel, faalt bij een drempelschending en bewaart het rapport als artifact."
+          model_answer: "Ik begin met een dataset van minstens tien cases: het normale pad, randgevallen, safety-scenario's en echte domeinvragen, met ground truth waar dat kan. Voor gestructureerde velden gebruik ik exacte of veldgerichte checks; voor vrije tekst een LLMJudge met een expliciete rubric, aangevuld met deterministische checks. Ik leg per categorie en overall een drempel vast en behandel kritieke cases als harde eis. In CI draai ik de suite deterministisch met TestModel of FunctionModel, met een kleine gecontroleerde live-run waar nodig. Een drempelschending laat de build falen en het rapport wordt als artifact bewaard, zodat de demo en het eval-rapport hetzelfde bewijs delen."
+          source: "PydanticAI h.15, p.148-161; LlamaIndex h.11, p.113-122"
+    cards:
+      - id: w22c1
+        front: "Noem de vier abstracties van Pydantic Evals."
+        back: "Dataset, Case, Evaluator en Experiment: cases verzamelen, scorelogica bepalen, de taak uitvoeren en een rapport opleveren."
+        source: "PydanticAI h.15"
+      - id: w22c2
+        front: "Wanneer kies je LLMJudge boven exacte match?"
+        back: "Bij vrije tekst waarin toon, volledigheid en betekenis tellen; gebruik een rubric, een steekproef en aanvulling met deterministische checks."
+        source: "PydanticAI h.15"
+      - id: w22c3
+        front: "Wat betekent een lage context recall bij hoge faithfulness?"
+        back: "De antwoorden zijn trouw aan de opgehaalde context, maar de retriever mist relevante documenten; het antwoord is onvolledig."
+        source: "LlamaIndex h.11"
+      - id: w22c4
+        front: "Waarom blokkeert een kritieke regressie de release?"
+        back: "Een gemiddelde verbergt falen op belangrijke cases; kritieke cases krijgen een harde drempel en mogen niet verslechteren."
+        source: "PydanticAI h.15"
+      - id: w22c5
+        front: "Waarom evalueer je gestructureerde output per veld?"
+        back: "Een overtuigend antwoord kan een foute classificatie verbergen; veldniveau lokaliseert de fout en maakt gerichte verbetering meetbaar."
+        source: "PydanticAI h.15"
+
+  - week: 23
+    phase: 5
+    title: "Capstone sprint 2: productie"
+    outcome: "Je draait de capstone op de VPS, onderbouwt de prestaties met een loadtest, hardt de aanvalsoppervlakte en bewijst observability met SLO's en een runbook."
+    reading:
+      - book: "PydanticAI: Building Production-Grade AI Agents"
+        ref: pydanticai
+        chapters: "9, 11"
+        pages: "86-95, 105-113"
+      - book: "Building Production-Ready AI Agents with LlamaIndex"
+        ref: llamaindex
+        chapters: "13"
+        pages: "133-145"
+    build:
+      goal: "Maak de slice productieklaar: deploy op de VPS, meet onder load, harden de service en bewijs observability met een SLO-dashboard en een runbook."
+      deliverable: "Gedeployde capstone met healthcheck, loadtestrapport, securitychecklist, SLO-dashboard, rollbackbewijs en runbook."
+      steps:
+        - "Containeriseer de slice en deploy naar de VPS met een immutable tag en secrets uit de secret store."
+        - "Schrijf een loadtest die de piek en de taakduur realistisch simuleert; meet latency p50/p95/p99, fouten, doorvoer en kosten."
+        - "Doe een security review: auth, inputvalidatie, least privilege, prompt-injectie, secret-rotatie en logging van gevoelige data."
+        - "Zet observability op: traces over agent, tool en model, metrics voor latency, fouten en kosten, en een dashboard."
+        - "Definieer SLO's en alerts, test een rollback en schrijf het runbook met eigenaar en escalatiepad."
+        - "Herhaal de loadtest na tuning en leg voor en na vast."
+      done_when:
+        - "De live URL werkt en /health geeft 200."
+        - "Het loadtestrapport bevat p95/p99, foutpercentage en kosten per request."
+        - "Elke securitybevinding heeft een status: opgelost, geaccepteerd of geblokkeerd."
+        - "Een rollback is uitgevoerd en het runbook is actueel."
+    challenge:
+      brief: "Lever een live capstone met een herhaalbaar loadtestrapport, een volledige securitychecklist en een SLO-dashboard dat een echte storing zichtbaar maakt."
+      verify: "bash scripts/verify-production.sh"
+      acceptance:
+        - "De capstone draait op de VPS achter een healthcheck."
+        - "De loadtest toont drempels en saturatie en is herhaalbaar."
+        - "De securitychecklist is volledig en de bevindingen zijn behandeld."
+        - "Het SLO-dashboard en de alerts zijn actief en getest."
+      evidence:
+        - "live URL"
+        - "loadtestrapport met p95/p99 en foutpercentage"
+        - "securitychecklist met statussen"
+        - "dashboard-screenshot en alerttest"
+        - "runbook en rollbackbewijs"
+    references:
+      - title: "Logfire documentatie"
+        url: "https://logfire.pydantic.dev/docs/"
+      - title: "OpenTelemetry"
+        url: "https://opentelemetry.io/docs/"
+      - title: "k6 load testing"
+        url: "https://k6.io/docs/"
+      - title: "OWASP LLM Top 10"
+        url: "https://genai.owasp.org/llm-top-10/"
+    exam:
+      pass_score: 85
+      minutes: 20
+      questions:
+        - id: w23q1
+          type: mcq
+          prompt: "Waarom is horizontaal schalen van een PydanticAI-service meestal eenvoudig?"
+          options:
+            A: "Omdat elke agent zijn volledige gesprekshistorie in het proces bewaart."
+            B: "Omdat agents stateless zijn: elke instance kan elk request verwerken, mits gedeelde state in een database of queue staat."
+            C: "Omdat de provider onbeperkt gratis requests geeft."
+            D: "Omdat een load balancer de prompt voor elke instance herschrijft."
+          answer: B
+          explanation: "De agents zelf houden geen sessiestate bij. Daardoor kun je meerdere instanties achter een load balancer zetten, maar gedeelde state, cache en idempotentie moeten buiten het proces leven."
+          source: "PydanticAI h.9, p.93-94; h.11, p.105-106"
+        - id: w23q2
+          type: mcq
+          prompt: "Wat doet ConcurrencyLimitedModel met max_running=5 en max_queued=20?"
+          options:
+            A: "Het maakt precies vijf modelcalls per dag mogelijk."
+            B: "Het verwijdert alle requests boven de twintig."
+            C: "Het laat maximaal vijf requests tegelijk lopen, houdt er twintig in de wachtrij en creëert daarboven backpressure."
+            D: "Het verhoogt de context window met vijf."
+          answer: C
+          explanation: "De limiet begrenst zowel gelijktijdigheid als wachtrijdiepte. Zo voorkom je dat je de provider overbelast en ontstaat expliciete backpressure in plaats van onbeperkte time-outs."
+          source: "PydanticAI h.9, p.91"
+        - id: w23q3
+          type: mcq
+          prompt: "Je wilt de kosten per request verlagen. Welke maatregel heeft volgens de token-economie meestal de grootste hefboom?"
+          options:
+            A: "De input-prompt inkorten, want input is altijd duurder dan output."
+            B: "Meer retries toestaan, zodat het antwoord vaker goed is."
+            C: "De output begrenzen en structured output gebruiken, omdat output tokens drie tot vijf keer duurder zijn dan input tokens."
+            D: "Altijd het grootste model kiezen."
+          answer: C
+          explanation: "Output tokens zijn doorgaans drie tot vijf keer duurder. Kortere, gestructureerde antwoorden en max_tokens hebben daarom een disproportioneel effect; input inkorten helpt ook, maar de verhouding is omgekeerd."
+          source: "PydanticAI h.9, p.86-87, 92"
+        - id: w23q4
+          type: mcq
+          prompt: "Wat is het belangrijkste risico van een te lage similarity_threshold in een semantic cache?"
+          options:
+            A: "De cache wordt nooit geraakt."
+            B: "Elke query wordt duurder door meer embeddings."
+            C: "De vectorstore raakt vol."
+            D: "Ook niet-vergelijkbare queries krijgen een gecachet antwoord, met false positives en mogelijk verkeerde antwoorden tot gevolg."
+          answer: D
+          explanation: "Een lage drempel verhoogt de hit rate maar verliest precisie: semantisch verschillende vragen kunnen hetzelfde antwoord krijgen. Kies de drempel op basis van gemeten precisie en monitor de cachekwaliteit."
+          source: "LlamaIndex h.13, p.135-136"
+        - id: w23q5
+          type: mcq
+          prompt: "Welke set hoort minimaal in de productiechecklist van een agent?"
+          options:
+            A: "Secrets via omgevingsvariabelen, usage limits, guardrails, rate limiting en audit logging."
+            B: "Een groene CI-run en een mooie README."
+            C: "Alleen een healthcheck en een Dockerfile."
+            D: "Een groter model en meer retries."
+          answer: A
+          explanation: "De checklist dekt beveiliging en kostenbeheersing: geen secrets in code of image, harde limieten, input- en outputguardrails, begrensde concurrency en audittrails."
+          source: "PydanticAI h.11, p.112-113"
+        - id: w23q6
+          type: open
+          prompt: "Je capstone gaat live op één VPS. Ontwerp je loadtest- en SLO-plan: welke werklast simuleer je, welke metrics met drempels gebruik je en wat is je noodrem bij een schending?"
+          key_points:
+            - "Werklast: representatieve mix van requests, piekconcurrentie, taakduur en denktijd; loadtest met ramp-up en herhaalbare scenario's."
+            - "Latency: p50/p95/p99 in plaats van gemiddelde, met een expliciete drempel per endpoint of taaktype."
+            - "Betrouwbaarheid en kwaliteit: foutpercentage, time-outs en eval-passrate op een steekproef, niet alleen HTTP 200."
+            - "Verzadiging en kosten: CPU, geheugen, queue-diepte, provider-rate-limits en kosten per request."
+            - "Noodrem: alerts, canary-stop of rollback, met een runbook, eigenaar en bewijs van een geteste rollback."
+          model_answer: "Ik simuleer een representatieve mix met een loadtest die opwarmt naar de verwachte piek, inclusief taakduur en denktijd. Ik meet p50/p95/p99 latency per endpoint, foutpercentage en time-outs, eval-passrate op een steekproef, en saturatie van CPU, geheugen, queue en provider-limieten. Daarnaast volg ik kosten per request. Bij een SLO-schending grijpt de noodrem in: alert naar de eigenaar, canary-stop of rollback naar de vorige digest, en een runbook met de exacte stappen. Ik test die rollback een keer voor de demo en leg het resultaat vast."
+          source: "PydanticAI h.9, p.86-95; h.11, p.105-113; LlamaIndex h.13, p.133-145"
+    cards:
+      - id: w23c1
+        front: "Waarom kunnen agents horizontaal schalen?"
+        back: "Omdat ze stateless zijn: elke instance kan elk request doen, mits gedeelde state, cache en idempotentie buiten het proces leven."
+        source: "PydanticAI h.9 en h.11"
+      - id: w23c2
+        front: "Wat begrenst ConcurrencyLimitedModel?"
+        back: "Het aantal gelijktijdige requests en de wachtrijdiepte, als backpressure tegen provider-rate-limits."
+        source: "PydanticAI h.9"
+      - id: w23c3
+        front: "Waarom is output vaak de grootste kostenhefboom?"
+        back: "Output tokens zijn doorgaans drie tot vijf keer duurder dan input; begrens de lengte en gebruik structured output."
+        source: "PydanticAI h.9"
+      - id: w23c4
+        front: "Wat is het risico van een lage semantic-cache-drempel?"
+        back: "False positives: semantisch verschillende vragen krijgen hetzelfde gecachete antwoord en dus mogelijk een verkeerd antwoord."
+        source: "LlamaIndex h.13"
+      - id: w23c5
+        front: "Noem vijf items uit de productiechecklist."
+        back: "Secrets via env, usage limits, guardrails, rate limiting en audit logging; daarnaast health, rollback en observability."
+        source: "PydanticAI h.11"
+
+  - week: 24
+    phase: 5
+    title: "Verdediging en carrière"
+    outcome: "Je verdedigt je capstone met primair bewijs, een architectuurreview en een portfolio dat je overdraagbare vaardigheden aantoont."
+    reading:
+      - book: "Mastering Claude Code"
+        ref: claudecode
+        chapters: "13"
+        pages: "150-165"
+      - book: "PydanticAI: Building Production-Grade AI Agents"
+        ref: pydanticai
+        chapters: "12"
+        pages: "114-121"
+    build:
+      goal: "Verdedig je capstone met bewijs: architectuur, demo, evaluatie, kosten en een portfolio dat je arbeidsmarktpositie onderbouwt."
+      deliverable: "Defensiedossier met architectuurreview, demo, evaluatierapport, kostenmodel, portfolio, CV, interviewoefeningen en een ingevulde rubric."
+      steps:
+        - "Schrijf een architectuurreview: context, beslissingen, alternatieven, risico's en wat je opnieuw zou doen."
+        - "Doe een live demo van vijf minuten langs het kritieke pad, inclusief een faalscenario en herstel."
+        - "Presenteer het evaluatierapport en het kostenmodel met cijfers en vergelijk ze met de succescriteria uit week 21."
+        - "Bundel het portfolio: repo, demo, evaluatie, loadtest, security en runbook, met per item een korte toelichting."
+        - "Werk je CV bij met meetbare resultaten en oefen vijf interviewvragen met STAR-antwoorden."
+        - "Laat een externe reviewer het portfolio en de verdediging beoordelen met de rubric."
+      done_when:
+        - "De verdediging duurt maximaal tien minuten en verwijst naar primair bewijs."
+        - "Elke claim in het portfolio heeft een link naar bewijs."
+        - "De externe reviewer heeft de rubric ingevuld en de feedback is verwerkt."
+        - "Het CV bevat geen onmeetbare superlatieven."
+    challenge:
+      brief: "Een externe reviewer beoordeelt je portfolio en je verdediging met een rubric op probleem, architectuur, bewijs, kosten en presentatie."
+      verify: "bash scripts/verify-defense.sh"
+      acceptance:
+        - "De reviewer beoordeelt probleem, architectuur, bewijs, kosten en presentatie."
+        - "De demo werkt live en toont een faalscenario en het herstelpad."
+        - "Het portfolio linkt elke claim aan bewijs."
+        - "De rubric is ingevuld en de feedback is zichtbaar verwerkt."
+      evidence:
+        - "ingevulde rubric van de externe reviewer"
+        - "opname van de demo"
+        - "portfolio-URL"
+        - "bijgewerkt CV"
+        - "korte reflectie met volgende stappen"
+    references:
+      - title: "Claude Code best practices"
+        url: "https://www.anthropic.com/engineering/claude-code-best-practices"
+      - title: "Pydantic Evals documentatie"
+        url: "https://ai.pydantic.dev/evals/"
+      - title: "PydanticAI documentatie"
+        url: "https://ai.pydantic.dev/"
+    exam:
+      pass_score: 85
+      minutes: 20
+      questions:
+        - id: w24q1
+          type: mcq
+          prompt: "Wat is de kern van het verificatieprincipe uit het boek?"
+          options:
+            A: "Een agent presteert beter als hij iets heeft om tegen te verifiëren, zoals tests, exitcodes of een spec; zonder dat ben jij de loop."
+            B: "Je moet elke regel code zelf typen."
+            C: "Je moet nooit subagents gebruiken."
+            D: "Verificatie is alleen nodig voor de UI."
+          answer: A
+          explanation: "Verificatie met een pass/fail-signaal sluit de feedbackloop: de agent draait de check, leest het resultaat en itereert. Zonder verificatie moet een mens elke fout opmerken."
+          source: "Claude Code h.13, p.150"
+        - id: w24q2
+          type: mcq
+          prompt: "Wat betekent de verdeling waarin mensen ongeveer 70 procent van de planningsbeslissingen nemen en de agent ongeveer 80 procent van de uitvoering?"
+          options:
+            A: "De agent mag de architectuur bepalen."
+            B: "De mens moet alle code reviewen, maar niet plannen."
+            C: "De rollen zijn complementair: de mens bepaalt het wat en de verificatie, de agent het hoe en de uitvoering."
+            D: "De agent is verantwoordelijk voor de acceptatiecriteria."
+          answer: C
+          explanation: "De verhouding onderstreept de rolverdeling: planning en verificatie blijven menselijk werk, uitvoering verschuift naar de agent. Wie de agent aanstuurt, moet het probleem en de succescriteria scherp hebben."
+          source: "Claude Code h.13, p.151"
+        - id: w24q3
+          type: mcq
+          prompt: "Welk portfolio-onderdeel maakt je werk het meest overdraagbaar naar een andere tool of werkgever?"
+          options:
+            A: "Een lijst met tool-specifieke sneltoetsen."
+            B: "Een verzameling prompts zonder context."
+            C: "Een screenshot van een groen dashboard zonder cijfers."
+            D: "Platform-agnostische casestudy's die probleem, beslissingen, verificatie en meetresultaten uitleggen."
+          answer: D
+          explanation: "Overdraagbaar bewijs gaat over probleemdefinitie, verificatie en review, niet over één tool. Zo kan een reviewer de kwaliteit van je oordeel zien, ongeacht de stack."
+          source: "Claude Code h.13, p.152-153"
+        - id: w24q4
+          type: mcq
+          prompt: "Waarom is continuous evaluation in productie nodig, ook als de eval in CI groen is?"
+          options:
+            A: "Omdat CI altijd ongelijk heeft."
+            B: "Omdat modellen, prompts, data en gebruikersgedrag veranderen; productiemonitoring detecteert drift en kwaliteitsdaling die CI niet ziet."
+            C: "Omdat productie-evaluatie het model automatisch verbetert."
+            D: "Omdat evaluatie in CI te duur is."
+          answer: B
+          explanation: "CI test een vaste set; productie verandert continu. Door recente interacties te beoordelen en bij een dalende passrate te alarmeren, zie je regressies voordat gebruikers ze melden."
+          source: "PydanticAI h.12, p.119-120"
+        - id: w24q5
+          type: mcq
+          prompt: "Wat overtuigt een externe reviewer het meest tijdens een architectuurverdediging?"
+          options:
+            A: "Het aantal features dat je hebt gebouwd."
+            B: "Een vlotte demo zonder cijfers."
+            C: "ADR's met context, alternatieven en gevolgen, aangevuld met meetbare evaluatie- en productiecijfers."
+            D: "Het aantal regels code en het gebruikte framework."
+          answer: C
+          explanation: "Een reviewer beoordeelt je oordeelsvermogen: waarom deze keuze, welke alternatieven, wat zijn de gevolgen en welk bewijs ondersteunt de claim. Cijfers en ADR's zijn sterker dan een featurelijst."
+          source: "Claude Code h.13, p.151-152; PydanticAI h.12, p.118-120"
+        - id: w24q6
+          type: open
+          prompt: "Verdedig je capstone in vijf minuten. Welke vier kernonderdelen behandel je, welk primair bewijs lever je per onderdeel en met welke reflectie sluit je af?"
+          key_points:
+            - "Probleem en doelgroep, met de gevalideerde probleemstelling en meetbare succescriteria uit week 21."
+            - "Architectuur en trade-offs, met ADR's, alternatieven en de schaalkeuze."
+            - "Evaluatie en kosten, met eval-rapport, loadtest en kosten per request tegen de drempels."
+            - "Productie en betrouwbaarheid, met live URL, SLO-dashboard, securitychecklist, runbook en rollbackbewijs."
+            - "Reflectie en volgende stap: wat zou je anders doen en welk leerdoel neem je mee?"
+          model_answer: "Ik begin met het probleem en de doelgroep, en laat de gevalideerde probleemstelling en de meetbare succescriteria zien. Daarna de architectuur: de belangrijkste ADR's, de alternatieven en de onderbouwde schaalkeuze. Vervolgens het bewijs: eval-rapport, loadtest, kosten per request en de vergelijking met de drempels. Dan productie: de live URL, het SLO-dashboard, de securitychecklist, het runbook en een geteste rollback. Ik sluit af met reflectie: wat ik anders zou doen en welk leerdoel ik meeneem. Elke claim heeft een link naar primair bewijs."
+          source: "Claude Code h.13, p.150-153; PydanticAI h.12, p.118-121"
+    cards:
+      - id: w24c1
+        front: "Wat gebeurt er als een agent geen verificatie heeft?"
+        back: "Dan ben jij de loop: elke fout wacht tot iemand haar opmerkt. Een pass/fail-check sluit de feedbackloop automatisch."
+        source: "Claude Code h.13"
+      - id: w24c2
+        front: "Hoe verhouden planning en uitvoering zich tussen mens en agent?"
+        back: "De mens neemt ongeveer 70 procent van de planningsbeslissingen, de agent ongeveer 80 procent van de uitvoering; verificatie blijft menselijk werk."
+        source: "Claude Code h.13"
+      - id: w24c3
+        front: "Wat maakt een portfolio overdraagbaar?"
+        back: "Platform-agnostische casestudy's over probleem, beslissingen, verificatie en meetresultaten, niet een lijst tool-specifieke commando's."
+        source: "Claude Code h.13"
+      - id: w24c4
+        front: "Waarom blijft continuous evaluation nodig na een groene CI?"
+        back: "Model, prompt, data en gebruik veranderen; productiemonitoring detecteert drift en kwaliteitsdaling die een vaste CI-set mist."
+        source: "PydanticAI h.12"
+      - id: w24c5
+        front: "Waaruit bestaat het sterkste verdedigingsbewijs?"
+        back: "ADR's met alternatieven en gevolgen, plus meetbare evaluatie-, loadtest- en productiecijfers die elke claim ondersteunen."
+        source: "Claude Code h.13; PydanticAI h.12"
