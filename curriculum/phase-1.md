@@ -2,6 +2,10 @@
 
 **Weken 1-6. Doel: één agent die je durft te deployen.**
 
+> **Bronaudit (13 november 2026):** fase 1 is tegen de officiële PydanticAI-,
+> Docker- en Kubernetes-docs gecontroleerd. Geen foute antwoordsleutels; 15
+> precisiecorrecties. Zie [docs/AUDITS/phase-1.md](../docs/AUDITS/phase-1.md).
+
 Deze fase lijkt misschien traag als je al agents hebt gebouwd. Dat is bewust.
 De meeste agentprojecten falen niet door een gebrek aan frameworks, maar door
 ontbrekende contracten, tests, foutpaden en een deploy die niemand kan
@@ -27,7 +31,7 @@ reproduceren. Hier leg je dat fundament.
 | Toolcontract | Een tool is een API met rechten, fouten en neveneffecten |
 | Dependency injection | Testbaarheid en vervangbaarheid |
 | Testpiramide | Snelle feedback plus bewijs op het echte systeem |
-| Immutable image | Reproduceerbare deploy en betrouwbare rollback |
+| Unieke tag of digest | Reproduceerbare deploy en betrouwbare rollback |
 | Healthcheck en smoke-test | Bewijs dat de gedeployde versie echt werkt |
 
 ## Weekoverzicht
@@ -75,7 +79,7 @@ reproduceren. Hier leg je dat fundament.
 - [ ] Live service op de VPS, bereikbaar via Tailscale of localhost.
 - [ ] `/health` geeft 200.
 - [ ] Smoke-test van het kritieke pad slaagt.
-- [ ] CI bouwt en pusht een immutable image.
+- [ ] CI bouwt en pusht een image met unieke tag of digest.
 - [ ] Rollback is uitgevoerd en gelogd.
 - [ ] Runbook: deploy, verify, rollback, secrets, back-up.
 
