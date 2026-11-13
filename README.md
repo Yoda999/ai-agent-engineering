@@ -142,6 +142,7 @@ volgende stappen.
 | [docs/FAQ.md](docs/FAQ.md) | Bezwaren, tijdsbudget, AI-gebruik, falen |
 | [START-HIER.md](START-HIER.md) | De eerste zeven dagen, dag voor dag |
 | [docs/BASELINE.md](docs/BASELINE.md) | Nulmeting: waar sta je nu? |
+| [docs/AUDITS/phase-1.md](docs/AUDITS/phase-1.md) | Bronaudit fase 1 tegen de officiële docs |
 
 ## Status
 

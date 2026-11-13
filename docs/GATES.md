@@ -78,7 +78,7 @@ Naast de weeksgate zijn er vier fasepoorten met extra bewijs.
 
 - [ ] Live URL of Tailscale-bereikbare service op de VPS.
 - [ ] `/health` geeft 200 en de smoke-test slaagt.
-- [ ] CI bouwt en pusht een immutable image.
+- [ ] CI bouwt en pusht een image met unieke tag of digest.
 - [ ] Rollback is minstens één keer uitgevoerd en gelogd.
 - [ ] Runbook met deploy, verify, rollback en secrets.
 

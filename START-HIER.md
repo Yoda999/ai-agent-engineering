@@ -61,11 +61,12 @@ def classify(text: str) -> TicketClassification:
 **Lezen:** PydanticAI h.2 afronden; Claude Code h.3.
 **Doen:** schrijf vijf tests met `TestModel`:
 
-1. geldige output;
+1. geldige output (inclusief `needs_human`);
 2. enum-waarde;
 3. maximale lengte van `summary`;
-4. lege input;
-5. `needs_human` true/false.
+4. lege of te lange input (inputvalidatie);
+5. een ongeldige modeloutput met `FunctionModel`, die gecontroleerd faalt of
+   binnen het retrybudget herstelt.
 
 ```python
 from pydantic_ai.models.test import TestModel
@@ -78,6 +79,10 @@ def test_schema():
 
 Zet `models.ALLOW_MODEL_REQUESTS = False` in je testconfig zodat een echte call
 niet per ongeluk kan.
+
+`TestModel` genereert schema-geldige data; het test dus je contract, niet je
+foutpad. Gebruik `FunctionModel` voor de ongeldige output. Zie de
+[PydanticAI testing-docs](https://pydantic.dev/docs/ai/guides/testing/).
 
 **Bewijs:** `pytest -q` groen + commit.
 
