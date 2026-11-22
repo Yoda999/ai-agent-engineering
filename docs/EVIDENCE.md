@@ -27,6 +27,7 @@ reproduceerbaar rapport en een URL zijn dat wel.
 | Securityrapport | threat model, injectietests, secret scan | zeer sterk |
 | Restore-drill | back-up teruggezet en geverifieerd | zeer sterk |
 | Kostenmodel | kosten per request/tenant met aannames | sterk |
+| Conceptreflectie | 5 regels antwoord op de Huyen-vraag, met bron | basis (verplicht) |
 
 ## Wat niet telt
 
@@ -42,6 +43,8 @@ reproduceerbaar rapport en een URL zijn dat wel.
 
 ### Fase 1
 
+- [ ] Conceptreflectie week 1-6 (Huyen h.1-4).
+
 - [ ] Commit van de agent met schema en tests.
 - [ ] Groene CI-run op die commit.
 - [ ] Image-digest in GHCR.
@@ -52,6 +55,8 @@ reproduceerbaar rapport en een URL zijn dat wel.
 
 ### Fase 2
 
+- [ ] Conceptreflectie week 7-11 (Huyen h.6, h.9).
+
 - [ ] Golden set (50+ items) met versie en herkomst.
 - [ ] Eval-rapport met recall@k, MRR, faithfulness en correctheid.
 - [ ] CI-run die aantoont dat een regressie wordt geblokkeerd.
@@ -61,6 +66,8 @@ reproduceerbaar rapport en een URL zijn dat wel.
 
 ### Fase 3
 
+- [ ] Conceptreflectie week 12-16 (Huyen h.5-6, h.3, h.10).
+
 - [ ] 20 trajectory-evaluaties met rubric en scores.
 - [ ] Trace-export met per-agent latency en kosten.
 - [ ] Failure-injection- en deadlocktests.
@@ -68,6 +75,8 @@ reproduceerbaar rapport en een URL zijn dat wel.
 - [ ] CI-regressiepoort voor kwaliteit.
 
 ### Fase 4
+
+- [ ] Conceptreflectie week 17-20 (Huyen h.5, h.9-10).
 
 - [ ] Threat model met aanvalspaden en maatregelen.
 - [ ] Prompt-injectiesuite met resultaten.
@@ -77,6 +86,8 @@ reproduceerbaar rapport en een URL zijn dat wel.
 - [ ] Postmortem met preventieve maatregel.
 
 ### Fase 5
+
+- [ ] Conceptreflectie week 21-24 (Huyen h.1, h.3-4, h.10).
 
 - [ ] 10 klantinterviews met citaten en conclusies.
 - [ ] Capstone-spec met probleem, doelgroep en succescriteria.

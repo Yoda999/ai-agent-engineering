@@ -1,0 +1,125 @@
+book: "AI Engineering: Building Applications with Foundation Models"
+author: "Chip Huyen"
+edition: "O'Reilly, 2025 (PDF-editie, 991 pagina's)"
+page_note: "Pagina's zijn PDF-pagina's van de editie in /home/yoda/Documents/Boeken/AI Engineering by Chip Huyen.pdf, geen gedrukte paginanummers. Lees de genoemde secties; de pagina's zijn een richtlijn."
+weeks:
+  - week: 1
+    chapters: "1"
+    pages: "91-110"
+    focus: "De AI-stack: modellaag, applicatielaag en waar agents en tools horen."
+    prompt: "Teken de stack voor je ticket-agent. Welke laag lost welk probleem op, en wat bouw je zelf versus wat koop je in?"
+  - week: 2
+    chapters: "2"
+    pages: "188-210"
+    focus: "Sampling, top-k/top-p, structured outputs en de kosten van tokens."
+    prompt: "Waarom is temperature=0 geen garantie op identieke output, en wat betekent dat voor je tests?"
+  - week: 3
+    chapters: "3"
+    pages: "240-266"
+    focus: "Intrinsieke metrics (cross-entropy, perplexity) versus similarity; waarom loss niet genoeg is."
+    prompt: "Waarom is perplexity een zwakke voorspeller voor de kwaliteit van je agent?"
+  - week: 4
+    chapters: "3"
+    pages: "272-295"
+    focus: "AI-as-judge: criteria, bias, kosten en wanneer je een judge vertrouwt."
+    prompt: "Ontwerp een judge-rubric voor ticketkwaliteit. Welke bias moet je calibreren?"
+  - week: 5
+    chapters: "4"
+    pages: "316-330"
+    focus: "Applicatiegerichte evaluatiecriteria en factual consistency."
+    prompt: "Kies vier criteria voor je ticket-agent en maak elk criterium meetbaar."
+  - week: 6
+    chapters: "4"
+    pages: "393-410"
+    focus: "Een evaluatiepipeline ontwerpen: businessmetrics, methoden en validatie."
+    prompt: "Welke eval draai je voor de deploy, en welke metric blokkeert een release?"
+  - week: 7
+    chapters: "6"
+    pages: "494-510"
+    focus: "Context en RAG: waarom retrieval, en wat RAG niet oplost."
+    prompt: "Waarom is RAG meer dan een vectorstore, en welke fout blijft na retrieval?"
+  - week: 8
+    chapters: "6"
+    pages: "520-535"
+    focus: "Chunking, contextual retrieval en indexkeuzes."
+    prompt: "Welke chunkstrategie kies je voor jouw corpus, en hoe bewijs je dat?"
+  - week: 9
+    chapters: "6"
+    pages: "543-557"
+    focus: "Agents: tools, planning en de grens met deterministische workflows."
+    prompt: "Wanneer is een agent gerechtvaardigd boven een deterministische workflow?"
+  - week: 10
+    chapters: "6"
+    pages: "530-543"
+    focus: "Retrieval evalueren: context recall, precisie en ablatie."
+    prompt: "Hoe bewijs je dat je retrieval echt beter is geworden?"
+  - week: 11
+    chapters: "9"
+    pages: "775-795"
+    focus: "Inference: latency, throughput, goodput en kosten."
+    prompt: "Wat is je bottleneck: model, retrieval of netwerk? Hoe meet je dat?"
+  - week: 12
+    chapters: "6"
+    pages: "557-570"
+    focus: "Planning, sequentiele decompositie en reflection."
+    prompt: "Welk deel van je multi-agentproces is deterministisch en welk deel modelgestuurd?"
+  - week: 13
+    chapters: "5"
+    pages: "462-480"
+    focus: "Prompt-aanvallen: direct, indirect en via tools."
+    prompt: "Welke invoer in je agent is vijandig, en waar test je dat?"
+  - week: 14
+    chapters: "10"
+    pages: "852-865"
+    focus: "Architectuur: guardrails, router/gateway en verantwoordelijkheden."
+    prompt: "Waar zet je guardrails: in de prompt, de tool of de architectuur?"
+  - week: 15
+    chapters: "6"
+    pages: "582-593"
+    focus: "Agenttrajecten evalueren: tools, stappen en uitkomsten."
+    prompt: "Beoordeel de weg naar het antwoord, niet alleen het antwoord. Welke metric gebruik je?"
+  - week: 16
+    chapters: "3"
+    pages: "283-295"
+    focus: "Judge-bias, criteria-ambiguiteit en calibratie."
+    prompt: "Hoe kalibreer je je judge tegen menselijke labels?"
+  - week: 17
+    chapters: "5"
+    pages: "462-493"
+    focus: "Defensieve prompt engineering en aanvalspaden."
+    prompt: "Ontwerp vijf injectietests voor je agent, inclusief een indirecte aanval."
+  - week: 18
+    chapters: "10"
+    pages: "880-895"
+    focus: "Monitoring, logs, traces en drift."
+    prompt: "Welke metric zou een regressie het vroegst zichtbaar maken?"
+  - week: 19
+    chapters: "9"
+    pages: "809-823"
+    focus: "Modeloptimalisatie: quantization, distillatie en batching."
+    prompt: "Wanneer is een kleiner model de betere keuze, en wat lever je in?"
+  - week: 20
+    chapters: "10"
+    pages: "894-910"
+    focus: "User feedback: expliciet, impliciet en degeneratieve loops."
+    prompt: "Hoe verzamel je feedback zonder de gebruikerservaring te breken?"
+  - week: 21
+    chapters: "1"
+    pages: "79-91"
+    focus: "Use-case-evaluatie: bouwen versus kopen en de waarde van het probleem."
+    prompt: "Welk probleem, welke gebruiker en welke meetbare waarde bewijs je met je capstone?"
+  - week: 22
+    chapters: "3"
+    pages: "232-245"
+    focus: "Evaluatiemethodologie herhalen: wat meet je en waarom?"
+    prompt: "Wat is je primaire capstone-metric en welke metric mag niet dalen?"
+  - week: 23
+    chapters: "9, 10"
+    pages: "775-795, 852-865"
+    focus: "Productie-review: inference en architectuur."
+    prompt: "Waar breek je bij 10x groei, en welke maatregel grijpt eerst?"
+  - week: 24
+    chapters: "1, 10"
+    pages: "91-110, 921-931"
+    focus: "De stack en de grenzen van feedback."
+    prompt: "Verdedig je stack en je feedbackloop in vijf minuten."

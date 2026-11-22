@@ -7,6 +7,20 @@ RAG is meer dan "embeddingen in een vectorstore". De kwaliteit wordt bepaald doo
 ingestion, chunking, metadata, retrieval, reranking en evaluatie. In deze fase
 leer je elke laag meten en verbeteren.
 
+## Conceptlaag: AI Engineering (Huyen)
+
+Huyen h.6 en h.9 geven de conceptuele basis voor deze fase: waarom context
+belangrijk is, wat RAG wel en niet oplost, hoe je retrieval evalueert en waar de
+kosten- en latencyhefbomen zitten. LlamaIndex leert je de implementatie.
+
+- **Week 7-8:** context, chunking en retrieval. RAG is geen synoniem voor een
+  vectorstore.
+- **Week 9-10:** agents en retrieval-evaluatie. Beoordeel de weg naar het
+  antwoord, niet alleen het antwoord.
+- **Week 11:** inference en kosten. Meet de bottleneck voordat je optimaliseert.
+
+De reflectievraag per week is verplicht bewijs (`--kind concept`).
+
 ## Wat je na deze fase kunt
 
 - Een corpus idempotent ingesten, met metadata en versies.

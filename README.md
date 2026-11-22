@@ -9,16 +9,27 @@ met een harde poort tussen de weken.
 
 [![CI](https://github.com/Yoda999/ai-agent-engineering/actions/workflows/ci.yml/badge.svg)](https://github.com/Yoda999/ai-agent-engineering/actions/workflows/ci.yml)
 
+## Nieuw in v2 (november 2026)
+
+- ***AI Engineering* (Chip Huyen) is de conceptuele ruggengraat** geworden: elke
+  week heeft een selectie met een reflectievraag.
+- **De gate heeft een zevende check:** zonder conceptreflectie (`--kind concept`)
+  is de week niet afgerond.
+- **Het dagblok is herverdeeld:** 10 min concept, 10 min praktijk, 20 min build.
+- **`aae start`** zet de kalender op de dag dat je echt begint; je nulmeting en
+  bewijs blijven bewaard.
+- **De leeslast is begrensd:** ongeveer 350 PDF-pagina's Huyen, geen 991.
+
 ## Wat dit is
 
 Dit is geen verzameling tutorials. Het is een leer- en bewijssysteem:
 
 - **24 weken**, 5 studietaken per week van 60 minuten, plus een gate-dag.
-- **Zes boeken** als bron, met een hoofdstuk-naar-week leeskaart.
-- **Per week:** 5 meerkeuzevragen + 1 open vraag, 5 geheugenkaarten en een
-  praktijkchallenge met acceptatiecriteria.
-- **Een gate** die examenscore (>= 85%), challenge, kaartbeheersing, studietijd
-  en bewijsstukken combineert. Slagen geeft de volgende week vrij.
+- **Zeven boeken** als bron: *AI Engineering* (Huyen) als conceptuele ruggengraat, zes frameworkboeken voor de praktijk.
+- **Per week:** 5 meerkeuzevragen + 1 open vraag, 5 geheugenkaarten, een
+  conceptreflectie uit *AI Engineering* en een praktijkchallenge met acceptatiecriteria.
+- **Een gate** die examenscore (>= 85%), challenge, kaartbeheersing, studietijd,
+  conceptreflectie en bewijsstukken combineert. Slagen geeft de volgende week vrij.
 - **Een CLI** (`aae`) die je planning, herhaling (SM-2), examens, bewijs en
   voortgang bijhoudt in SQLite.
 - **Vijf fasen** van getypeerde agents naar retrieval, multi-agent, productie
@@ -49,13 +60,14 @@ architectuurbeslissingen en een live demo.
 
 ```text
 10 min  Herhaling: aae cards
-15 min  Theorie: lees de pagina's, schrijf 5 punten + 3 vragen
-25 min  Hands-on: bouw de stap en commit
+10 min  Concept: lees Huyen, beantwoord de reflectievraag in 5 regels
+10 min  Praktijk: lees de frameworkpagina's die je nu nodig hebt
+20 min  Hands-on: bouw de stap en commit
  5 min  Test: aae exam of de challenge-tests
  5 min  Log: aae log 60 en voeg bewijs toe
 ```
 
-De week eindigt met een **gate**: examen, challenge, kaarten, uren en bewijs.
+De week eindigt met een **gate**: examen, challenge, kaarten, uren, conceptreflectie en bewijs.
 Bij falen volgt een herstelplan en een verplichte wachttijd van 24 uur.
 
 ## Begin hier
@@ -72,6 +84,7 @@ python3 -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
 
 aae doctor          # omgeving controleren
+aae start           # zet de kalender op vandaag (na een pauze)
 aae today           # plan voor vandaag
 aae plan            # alle 24 weken
 aae cards           # kaarten herhalen
@@ -91,6 +104,7 @@ PYTHONPATH=src python3 -m aae today
 
 ```text
 assessments/phase-*.yaml   # bron van waarheid: lezen, bouwen, examen, kaarten
+assessments/huyen-track.yaml # concepttrack: 24 reflecties uit AI Engineering
 curriculum/phase-*.md      # narratief per fase, valkuilen en extra oefeningen
 docs/                      # strategie, methode, gates, bewijs, scaling, setup
 src/aae/                   # CLI: planning, SRS, examens, gates, rapport
@@ -100,12 +114,13 @@ tests/                     # tests op de leer-machine zelf
 
 ## De boeken
 
-De selectie dekt de volledige keten: getypeerde agents (PydanticAI), retrieval
-(LlamaIndex), orkestratie (CrewAI), integratie (LangChain), meten en
-optimaliseren (DSPy) en agentic coding (Claude Code).
+De selectie dekt de volledige keten: concepten en evaluatie (Huyen), getypeerde
+agents (PydanticAI), retrieval (LlamaIndex), orkestratie (CrewAI), integratie
+(LangChain), meten en optimaliseren (DSPy) en agentic coding (Claude Code).
 
 | Ref | Boek | Rol |
 |---|---|---|
+| `huyen` | AI Engineering — Chip Huyen | Conceptuele ruggengraat: evaluatie, RAG, agents, inference, architectuur |
 | `pydanticai` | PydanticAI: Building Production-Grade AI Agents | Kern voor getypeerde, geteste agents |
 | `llamaindex` | Building Production-Ready AI Agents with LlamaIndex | RAG, retrieval en productiepatronen |
 | `crewai` | CrewAI in Action | Multi-agent orkestratie, flows, MCP |
@@ -142,11 +157,12 @@ volgende stappen.
 | [docs/FAQ.md](docs/FAQ.md) | Bezwaren, tijdsbudget, AI-gebruik, falen |
 | [START-HIER.md](START-HIER.md) | De eerste zeven dagen, dag voor dag |
 | [docs/BASELINE.md](docs/BASELINE.md) | Nulmeting: waar sta je nu? |
+| [docs/SOURCES.md](docs/SOURCES.md) | Bronhiërarchie: docs, Huyen, frameworkboeken |
 | [docs/AUDITS/phase-1.md](docs/AUDITS/phase-1.md) | Bronaudit fase 1 tegen de officiële docs |
 
 ## Status
 
-- [x] 24 weken, 120 meerkeuzevragen, 24 open vragen, 120 kaarten
+- [x] 24 weken, 120 meerkeuzevragen, 24 open vragen, 120 kaarten, 24 conceptreflecties
 - [x] Gate-mechanisme met SRS, examens, challenges en bewijs
 - [x] CLI met tests en CI
 - [ ] Week 1 gestart (startdatum invullen)

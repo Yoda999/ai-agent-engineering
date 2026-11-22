@@ -36,13 +36,21 @@ kunt.
 De CLI geeft onmiddellijk score, de tests geven rood/groen, de loadtest geeft
 p95, de eval geeft cijfers. Je hoeft niet te raden of je goed bezig bent.
 
+## Concept en praktijk
+
+Elke week heeft twee leeslagen. **Huyen** (10 min) geeft je de concepten,
+criteria en trade-offs; de **frameworkboeken** (10 min) geven je de code. De
+reflectievraag uit Huyen is verplicht bewijs. Zo voorkom je dat je een framework
+kunt bedienen zonder te weten wanneer het resultaat goed genoeg is.
+
 ## Het 60-minutenblok
 
 | Min | Onderdeel | Wat je precies doet |
 |---|---|---|
 | 10 | Herhaling | `aae cards`; alle openstaande kaarten, scores 0-3 |
-| 15 | Theorie | lees de pagina's; boek dicht; schrijf 5 punten en 3 vragen op |
-| 25 | Hands-on | één buildstap, klein genoeg om af te maken; commit |
+| 10 | Concept | lees Huyen; beantwoord de reflectievraag in 5 regels |
+| 10 | Praktijk | lees de frameworkpagina's die je nu nodig hebt |
+| 20 | Hands-on | één buildstap, klein genoeg om af te maken; commit |
 | 5 | Test | `aae exam --week N` of de challenge-tests |
 | 5 | Log | `aae log 60`; bewijs toevoegen; 3 regels reflectie |
 
@@ -52,6 +60,8 @@ Regels:
 - **Eerst boek dicht, dan notities.** Anders kopieer je in plaats van denken.
 - **Geen tabbladen-jacht.** Je leest de aangewezen pagina's; de rest is naslag.
 - **Commit elke dag.** Een commit is je bewijs dat je iets hebt afgemaakt.
+- **Concept en praktijk zijn apart.** Huyen geeft je de meetlat; het framework
+  geeft je de code. Verwar ze niet.
 
 ## Een hoofdstuk lezen dat blijft hangen
 

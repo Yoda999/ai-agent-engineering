@@ -11,6 +11,22 @@ De meeste agentprojecten falen niet door een gebrek aan frameworks, maar door
 ontbrekende contracten, tests, foutpaden en een deploy die niemand kan
 reproduceren. Hier leg je dat fundament.
 
+## Conceptlaag: AI Engineering (Huyen)
+
+Deze fase leunt op Huyen h.1-4: de AI-stack, sampling, evaluatiemetrics, de
+AI-as-judge en de evaluatiepipeline. De frameworkboeken leren je de code; Huyen
+leert je welke vragen je moet stellen en wanneer een resultaat bewijs is.
+
+- **Week 1-2:** stack en sampling. Waarom is een agent een applicatielaag boven
+  een model, en waarom is `temperature=0` geen determinisme?
+- **Week 3-4:** metrics en judge. Perplexity en similarity zijn geen
+  productkwaliteit; een judge is een meetinstrument met bias.
+- **Week 5-6:** criteria en pipeline. Kies je criteria en drempels voordat je
+  deployt.
+
+De reflectievraag per week is verplicht bewijs (`--kind concept`). Zonder
+reflectie is de gate dicht, ook als je code groen is.
+
 ## Wat je na deze fase kunt
 
 - Een agent met een expliciet uitvoerschema bouwen en valideren.

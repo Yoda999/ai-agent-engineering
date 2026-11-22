@@ -122,7 +122,20 @@ def evaluate(
         )
     )
 
-    # 6. Bewijsstukken.
+    # 6. Conceptreflectie (AI Engineering).
+    concept_count = db.evidence_kind_count(progress, week.week, "concept")
+    checks.append(
+        Check(
+            "concept",
+            "Conceptreflectie",
+            concept_count >= 1,
+            "aanwezig" if concept_count >= 1 else "nog geen reflectie",
+            "Schrijf 5 regels antwoord op de Huyen-vraag en voeg toe: "
+            f"`aae evidence --week {week.week} --kind concept --ref \"h.X reflectie\"`.",
+        )
+    )
+
+    # 7. Bewijsstukken.
     min_evidence = _int_meta(progress, "min_evidence")
     count = db.evidence_count(progress, week.week)
     checks.append(

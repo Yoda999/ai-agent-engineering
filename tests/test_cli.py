@@ -29,6 +29,15 @@ class CliTest(unittest.TestCase):
         self.assertEqual(code, 0)
         self.assertIn("WEEK 1", output)
         self.assertIn("Blok van 60 minuten", output)
+        self.assertIn("Concept (AI Engineering, Huyen)", output)
+
+    def test_start_sets_start_date(self):
+        code, output = run("--home", self.home, "start", "--date", "2026-01-01")
+        self.assertEqual(code, 0)
+        self.assertIn("2026-01-01", output)
+        progress = db.connect(Path(self.home))
+        self.assertEqual(db.start_date(progress).isoformat(), "2026-01-01")
+        progress.db.close()
 
     def test_log_and_status(self):
         code, _ = run("--home", self.home, "log", "60", "--note", "test")
