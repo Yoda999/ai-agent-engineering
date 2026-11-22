@@ -52,7 +52,11 @@ De PDF's staan in:
 
 ```text
 /home/yoda/Documents/Boeken/AI Boeken/pdf
+/home/yoda/Documents/Boeken/AI Engineering by Chip Huyen.pdf
 ```
+
+Voor Huyen gebruik je **PDF-pagina's** (het boek heeft 991 PDF-pagina's); de
+leeskaart vermeldt dat expliciet.
 
 De leeskaart verwijst naar gedrukte paginanummers. Maak eventueel een tekstversie
 voor snelle zoekopdrachten (niet committen; auteursrecht):
@@ -262,6 +266,7 @@ Nooit in git, nooit in het image, nooit in een Docker-label.
 ## 9. Dagelijkse routine
 
 ```bash
+aae start             # eenmalig: kalender op vandaag
 aae today
 aae cards
 # 15 min lezen, 25 min bouwen

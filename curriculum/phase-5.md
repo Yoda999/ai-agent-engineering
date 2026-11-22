@@ -7,6 +7,18 @@ Je hebt nu de bouwstenen. Deze fase dwingt je om van features naar een product
 te gaan: een echt probleem, echte gebruikers, een kostenmodel en een
 verdediging tegen kritiek.
 
+## Conceptlaag: AI Engineering (Huyen)
+
+Huyen h.1 (use-case en stack), h.3-4 (evaluatie) en h.10 (architectuur en
+feedback) zijn de basis voor de capstone. Je verdedigt niet alleen wat je bouwde,
+maar ook waarom het probleem, de metric en het schaalpad kloppen.
+
+- **Week 21:** use-case, build-versus-buy en unit economics.
+- **Week 22:** evaluatie als ontwerpbeslissing, niet als test achteraf.
+- **Week 23-24:** architectuur, feedback en de grenzen van je bewijs.
+
+De reflectievraag per week is verplicht bewijs (`--kind concept`).
+
 ## Week 21 — Van idee naar architectuur
 
 Een businessidee is pas bruikbaar als het probleem scherp is. Deze week praat je

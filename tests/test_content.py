@@ -29,6 +29,13 @@ class ContentTest(unittest.TestCase):
         ids += [c["id"] for w in weeks for c in w.cards]
         self.assertEqual(len(ids), len(set(ids)))
 
+    def test_every_week_has_a_concept(self):
+        weeks = content.load_all()
+        self.assertEqual(len([w for w in weeks if w.concept]), 24)
+        for week in weeks:
+            for key in ("chapters", "pages", "focus", "prompt"):
+                self.assertTrue(week.concept.get(key), f"week {week.week} mist {key}")
+
     def test_every_week_has_a_gate(self):
         for week in content.load_all():
             self.assertGreaterEqual(week.pass_score, 85)

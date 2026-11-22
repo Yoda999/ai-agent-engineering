@@ -9,16 +9,26 @@ Dit is de meest concrete route. Als je niets anders leest, lees dit en begin.
 - [ ] `aae doctor` is groen (Docker mag ontbreken als je lokaal blijft).
 - [ ] Een API-key of lokale Ollama; een uitgavenlimiet staat aan.
 - [ ] Een GitHub-account en een geldige PAT (zie [SETUP.md](docs/SETUP.md)).
+- [ ] `aae start` gezet op de dag dat je echt begint (na een pauze!).
 
 ## Dag 0 — Nulmeting (30 min, optioneel maar aanbevolen)
 
 Doe de [nulmeting](docs/BASELINE.md) zonder boek of AI. Noteer je score; die
 kalibreert je tempo en je verwachtingen. Je hoeft niets te installeren.
 
+Heb je de nulmeting al gedaan maar ben je nog niet begonnen? Zet de kalender op
+vandaag zonder je bewijs te verliezen:
+
+```bash
+aae start
+```
+
 ## Dag 1 — Omgeving en eerste agent (60 min)
 
-**Lezen (15 min):** PydanticAI p. 4-25 (h.1-2), Claude Code p. 8-47 (h.1-3).
-**Doen (35 min):**
+**Concept (10 min):** Huyen h.1, PDF p. 91-110 (de AI-stack). Beantwoord in vijf
+regels: welke laag lost welk probleem op, en wat bouw je zelf versus in?
+**Praktijk (10 min):** PydanticAI p. 4-25 (h.1-2), Claude Code p. 8-47 (h.1-3).
+**Doen (30 min):**
 
 ```bash
 mkdir agent-lab-01 && cd agent-lab-01
@@ -54,11 +64,16 @@ def classify(text: str) -> TicketClassification:
     return agent.run_sync(text).output
 ```
 
-**Bewijs (10 min):** eerste commit.
+**Bewijs (10 min):** eerste commit en je conceptnotitie:
+
+```bash
+aae evidence --week 1 --kind concept --ref "h.1: stack voor ticket-agent"
+```
 
 ## Dag 2 — Tests zonder netwerk
 
-**Lezen:** PydanticAI h.2 afronden; Claude Code h.3.
+**Concept:** werk je notitie bij na het lezen van Huyen h.1.
+**Praktijk:** PydanticAI h.2 afronden; Claude Code h.3.
 **Doen:** schrijf vijf tests met `TestModel`:
 
 1. geldige output (inclusief `needs_human`);

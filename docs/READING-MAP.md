@@ -1,11 +1,52 @@
 # Leeskaart: hoofdstukken en pagina's per week
 
-De paginanummers zijn de **gedrukte** paginanummers uit de boeken. In een
-PDF-reader kunnen ze een paar pagina's verschoven zijn; zoek op hoofdstuktitel
-als het niet klopt.
+Er zijn twee soorten paginanummers:
+
+- **Gedrukte pagina's** voor de zes frameworkboeken. In een PDF-reader kunnen ze
+  een paar pagina's verschoven zijn; zoek op hoofdstuktitel als het niet klopt.
+- **PDF-pagina's** voor *AI Engineering* van Chip Huyen. Die editie heeft 991
+  PDF-pagina's en geen betrouwbare gedrukte paginanummers in de tekst; gebruik
+  de PDF-pagina's en de sectienaam.
 
 Je leest gericht, niet lineair. De kolom "Rol" zegt waarom een hoofdstuk in een
-week zit; de rest van het boek is naslagwerk.
+week zit; de rest van het boek is naslagwerk. Elk weekblok is **10 minuten
+concept (Huyen) + 10 minuten praktijk (framework)**.
+
+## AI Engineering — Chip Huyen (concepttrack, 991 PDF-p.)
+
+Deze track is de ruggengraat: hij bepaalt welke vragen je stelt en welke
+metrics je serieus neemt. Je leest geen 991 pagina's; je leest de secties die
+bij de week horen.
+
+| Week | Hfst | PDF-p. | Focus |
+|---|---|---|---|
+| 1 | 1 | 91-110 | De AI-stack: model, applicatie, agents |
+| 2 | 2 | 188-210 | Sampling, structured outputs, tokens |
+| 3 | 3 | 240-266 | Metrics, perplexity, similarity |
+| 4 | 3 | 272-295 | AI-as-judge, bias, kosten |
+| 5 | 4 | 316-330 | Evaluatiecriteria en factual consistency |
+| 6 | 4 | 393-410 | Evaluatiepipeline en businessmetrics |
+| 7 | 6 | 494-510 | Context en RAG |
+| 8 | 6 | 520-535 | Chunking en contextual retrieval |
+| 9 | 6 | 543-557 | Agents, tools en planning |
+| 10 | 6 | 530-543 | Retrieval evalueren |
+| 11 | 9 | 775-795 | Inference, latency en kosten |
+| 12 | 6 | 557-570 | Planning en reflection |
+| 13 | 5 | 462-480 | Prompt-aanvallen |
+| 14 | 10 | 852-865 | Architectuur en guardrails |
+| 15 | 6 | 582-593 | Agenttrajecten evalueren |
+| 16 | 3 | 283-295 | Judge-bias en calibratie |
+| 17 | 5 | 462-493 | Defensieve prompt engineering |
+| 18 | 10 | 880-895 | Monitoring, traces en drift |
+| 19 | 9 | 809-823 | Modeloptimalisatie |
+| 20 | 10 | 894-910 | User feedback |
+| 21 | 1 | 79-91 | Use-case en build-versus-buy |
+| 22 | 3 | 232-245 | Evaluatiemethodologie herhalen |
+| 23 | 9, 10 | 775-795, 852-865 | Productie-review |
+| 24 | 1, 10 | 91-110, 921-931 | Stack en feedbackgrenzen |
+
+De bijbehorende reflectievragen staan in
+[`assessments/huyen-track.yaml`](../assessments/huyen-track.yaml).
 
 ## PydanticAI: Building Production-Grade AI Agents (206 p.)
 
@@ -124,7 +165,8 @@ week zit; de rest van het boek is naslagwerk.
 
 ## Hoeveel lees je?
 
-De kernroute leest ongeveer **700 van de 1.014 pagina's**—niet alles, maar de
+De zes frameworkboeken: ongeveer **700 van de 1.014 pagina's**. Daar komt
+ongeveer **350 geselecteerde PDF-pagina's** van Huyen bij. Niet alles, maar de
 pagina's die bij de build van die week horen. De overige pagina's zijn bewust
 naslag: je leest ze wanneer een beslissing of fout daarom vraagt.
 

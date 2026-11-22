@@ -131,17 +131,29 @@ def cmd_today(args: argparse.Namespace) -> int:
     print(f"Dag {offset + 1} van je programma | {day.isoformat()} | kaarten te herhalen: {due}")
     print("=" * 68)
     print(f"\nDoel: {week.outcome}\n")
-    print("Lezen:")
+    print("Lezen (praktijk):")
     for item in week.reading:
         print(f"  - {item.get('book')} | {item.get('chapters')} | p. {item.get('pages')}")
+    if week.concept:
+        print("\nConcept (AI Engineering, Huyen):")
+        print(
+            f"  h.{week.concept.get('chapters')} | PDF p. {week.concept.get('pages')} | "
+            f"{week.concept.get('focus')}"
+        )
+        print(f"  Reflectie: {week.concept.get('prompt')}")
+        print(
+            f"  Bewijs: schrijf 5 regels en voeg toe met "
+            f"`aae evidence --week {week.week} --kind concept --ref \"h.{week.concept.get('chapters')} reflectie\"`"
+        )
     print("\nBouwen:")
     print(f"  {week.build.get('goal', '')}")
     for step in week.build.get("steps", []):
         print(f"  - {step}")
     print("\nBlok van 60 minuten:")
     print("  10 min  Herhaling: aae cards")
-    print("  15 min  Theorie: lees de opgegeven pagina's, schrijf 5 punten + 3 vragen")
-    print("  25 min  Hands-on: werk aan de build-stap en commit")
+    print("  10 min  Concept: lees Huyen, beantwoord de reflectievraag in 5 regels")
+    print("  10 min  Praktijk: lees de frameworkpagina's die je nu nodig hebt")
+    print("  20 min  Hands-on: werk aan de build-stap en commit")
     print("   5 min  Test: aae exam --week %d of de challenge-tests" % week.week)
     print("   5 min  Log: aae log 60 --note \"...\" en bewijs toevoegen")
     print("\nGate-status:")
@@ -152,6 +164,16 @@ def cmd_today(args: argparse.Namespace) -> int:
         for ref in week.references:
             print(f"  - {ref.get('title')}: {ref.get('url')}")
     print("\nVolgende stap: `aae cards` en daarna `aae exam --week %d`." % week.week)
+    return 0
+
+
+def cmd_start(args: argparse.Namespace) -> int:
+    progress = _progress(args)
+    day = date.fromisoformat(args.date) if args.date else date.today()
+    old = db.start_date(progress)
+    db.set_meta(progress, "start_date", day.isoformat())
+    print(f"Startdatum gezet op {day.isoformat()} (was {old.isoformat()}).")
+    print("Je voortgang, kaarten en bewijs blijven bewaard; alleen de kalender schuift.")
     return 0
 
 
@@ -464,6 +486,11 @@ def cmd_plan(args: argparse.Namespace) -> int:
         refs = ", ".join(f"{r['ref']} p.{r['pages']}" for r in week.reading)
         print(f"W{week.week:02d} [fase {week.phase}] {week.title}")
         print(f"     lezen: {refs}")
+        if week.concept:
+            print(
+                f"     concept: Huyen h.{week.concept.get('chapters')} "
+                f"p.{week.concept.get('pages')} - {week.concept.get('focus')}"
+            )
         print(f"     bouwen: {week.build.get('deliverable', '')}")
     return 0
 
@@ -520,6 +547,10 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("today", help="plan van vandaag")
     p.add_argument("--date", help="simuleer een datum (YYYY-MM-DD)")
     p.set_defaults(func=cmd_today)
+
+    p = sub.add_parser("start", help="startdatum van het programma op vandaag zetten")
+    p.add_argument("--date", help="YYYY-MM-DD (standaard: vandaag)")
+    p.set_defaults(func=cmd_start)
 
     p = sub.add_parser("log", help="studietijd loggen")
     p.add_argument("minutes", type=int)

@@ -13,10 +13,31 @@ Ja, door meerdere blokken per dag te doen. Nee, door gates over te slaan. De
 gate is de meetlat, niet de administratie. Sneller mag alleen als je het bewijs
 levert.
 
-## Moet ik alle zes boeken lezen?
+## Moet ik alle zeven boeken lezen?
 
-Nee. De [leeskaart](READING-MAP.md) wijst ongeveer 700 van de 1.014 pagina's aan.
-De rest is naslag. Je leest om te bouwen, niet om een boek uit te hebben.
+Nee. *AI Engineering* (Huyen) is de conceptuele track: je leest de
+weekselecties en beantwoordt de reflectievraag. Van de zes frameworkboeken lees
+je de pagina's die bij de build horen. De [leeskaart](READING-MAP.md) wijst
+ongeveer 700 frameworkpagina's en 350 Huyen-PDF-pagina's aan. De rest is
+naslag. Je leest om te bouwen, niet om een boek uit te hebben.
+
+## Ik heb weinig tijd. Kan het korter?
+
+Ja, maar niet door de gate te skippen. De minimale route per dag is:
+
+1. 10 min kaarten;
+2. 10 min Huyen-concept + 5 regels reflectie;
+3. 25 min build;
+4. 5 min test;
+5. 5 min loggen.
+
+Sla de optionele frameworkpagina's over en lees alleen wat de build nodig heeft.
+De concepttrack en de build zijn niet optioneel; de rest is naslag.
+
+## Ik ben nog niet begonnen, maar heb al een nulmeting.
+
+Gebruik `aae start`. Dat zet de startdatum op vandaag, zonder je gelogde uren,
+kaarten of bewijs te wissen. Je hoeft de database niet te verwijderen.
 
 ## Heb ik een betaalde API nodig?
 
@@ -45,7 +66,8 @@ Ja, en je moet het leren gebruiken: dat is de vaardigheid. De regels:
 ## De code in het boek is verouderd.
 
 Boeken lopen achter op releases. Het concept is leidend; de API vind je in de
-officiële documentatie. Pin je versies en noteer afwijkingen in je README. Een
+officiële documentatie. Voor Huyen geldt hetzelfde: de concepten zijn sterk,
+maar de voorbeelden kunnen verouderd zijn. Pin je versies en noteer afwijkingen in je README. Een
 goede oefening: laat AI het verschil uitleggen en verifieer dat tegen de docs.
 
 ## Ik faal steeds op dezelfde gate.

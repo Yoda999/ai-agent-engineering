@@ -31,6 +31,7 @@ class GateTest(unittest.TestCase):
             db.log_session(self.progress, 60, "studie", today - timedelta(days=i))
         for i in range(3):
             db.add_evidence(self.progress, 1, "commit", f"sha{i}")
+        db.add_evidence(self.progress, 1, "concept", "h.1 reflectie")
         db.record_exam(self.progress, 1, 90.0, True, {})
         db.record_challenge(self.progress, 1, True, {})
         for card in self.week.cards:
@@ -45,7 +46,7 @@ class GateTest(unittest.TestCase):
     def test_all_checks_pass(self):
         result = gate.evaluate(self.progress, self.week)
         self.assertTrue(result.passed, [c.detail for c in result.failed])
-        self.assertEqual(len(result.checks), 6)
+        self.assertEqual(len(result.checks), 7)
 
     def test_exam_too_low(self):
         self.progress.db.execute("UPDATE exams SET score = 60 WHERE week = 1")
@@ -60,6 +61,13 @@ class GateTest(unittest.TestCase):
         result = gate.evaluate(self.progress, self.week)
         self.assertFalse(result.passed)
         self.assertIn("cards", [c.key for c in result.failed])
+
+    def test_missing_concept_reflection(self):
+        self.progress.db.execute("DELETE FROM evidence WHERE week = 1 AND kind = 'concept'")
+        self.progress.db.commit()
+        result = gate.evaluate(self.progress, self.week)
+        self.assertFalse(result.passed)
+        self.assertIn("concept", [c.key for c in result.failed])
 
     def test_missing_evidence(self):
         self.progress.db.execute("DELETE FROM evidence WHERE week = 1")

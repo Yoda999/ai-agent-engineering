@@ -163,6 +163,13 @@ def add_evidence(
     progress.db.commit()
 
 
+def evidence_kind_count(progress: Progress, week: int, kind: str) -> int:
+    row = progress.db.execute(
+        "SELECT COUNT(*) AS n FROM evidence WHERE week = ? AND kind = ?", (week, kind)
+    ).fetchone()
+    return int(row["n"])
+
+
 def evidence_count(progress: Progress, week: int) -> int:
     row = progress.db.execute(
         "SELECT COUNT(*) AS n FROM evidence WHERE week = ?", (week,)

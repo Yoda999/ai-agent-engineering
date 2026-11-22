@@ -6,6 +6,20 @@ gebruikers en dat je kunt verdedigen bij een security- of operations-review.**
 Tot nu toe heb je gebouwd en gemeten. Nu harden je: aanvalsoppervlak, evaluatie
 op schaal, gelijktijdigheid, multi-tenancy, SLO's en herstel.
 
+## Conceptlaag: AI Engineering (Huyen)
+
+Huyen h.5 (defensieve prompts), h.9 (inference) en h.10 (monitoring,
+architectuur en feedback) vormen de meetlat voor deze fase. De frameworkboeken
+leveren de concrete implementatie van security, performance en ops.
+
+- **Week 17:** aanvalspaden en verdediging. Injection is een architectuurrisico.
+- **Week 18:** monitoring, traces en drift. Een dashboard zonder eigenaar is
+  decoratie.
+- **Week 19-20:** inference, caching en user feedback. Schaal en feedback
+  beïnvloeden elkaar.
+
+De reflectievraag per week is verplicht bewijs (`--kind concept`).
+
 ## Wat je na deze fase kunt
 
 - Een threat model maken voor een agent met tools en gevoelige data.

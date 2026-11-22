@@ -1,8 +1,13 @@
 # Roadmap: 24 weken naar aantoonbare agent-expertise
 
 Deze roadmap is de uitvoerbare vorm van de strategie. Elke week heeft een
-onderwerp, bronpagina's, een bouwopdracht en een gate met bewijs. Je kunt pas
-naar de volgende week als de gate groen is.
+onderwerp, bronpagina's, een bouwopdracht, een conceptreflectie en een gate met
+bewijs. Je kunt pas naar de volgende week als de gate groen is.
+
+**V2 (november 2026):** *AI Engineering* van Chip Huyen is toegevoegd als
+conceptuele ruggengraat. De zes frameworkboeken leveren de code; Huyen levert
+het waarom en de meetlat. Elke week heeft 10 minuten concept en 10 minuten
+praktijklezen in het 60-minutenblok.
 
 ## Ontwerpprincipes
 
@@ -25,23 +30,41 @@ naar de volgende week als de gate groen is.
 | **Totaal tot einde programma** | **200-250** |
 
 Eén uur per dag is het minimum, niet het maximum. De capstone vraagt in de
-laatste fase meer tijd; plan die bewust in.
+laatste fase meer tijd; plan die bewust in. Het conceptlezen is bewust klein
+gehouden (10-20 PDF-pagina's per week), zodat het naast de build past.
 
 ## Weekritme
 
 | Dag | Focus | Bewijs |
 |---|---|---|
-| Ma | Theorie + eerste buildstap | Commit + 5 punten samenvatting |
+| Ma | Concept + praktijk + eerste buildstap | Commit + 5 punten samenvatting + conceptnotitie |
 | Di | Buildstap 2 | Commit + test |
 | Wo | Buildstap 3 | Commit + test |
 | Do | Buildstap 4 | Commit + test |
 | Vr | Integratie + challenge | Challenge-run |
-| Za | Examen + gate + retrospective | Examenscore + gate |
+| Za | Examen + gate + retrospective | Examenscore + gate + conceptbewijs |
 | Zo | Rust of lichte herhaling (15 min) | Optioneel |
+
+## Concepttrack: AI Engineering (Huyen)
+
+De concepttrack is geen extra boek om af te vinken; hij bepaalt **wat je meet en
+waarom**. Per fase:
+
+| Fase | Huyen | Kernvragen |
+|---|---|---|
+| 1 | h.1-4 | AI-stack, sampling, metrics, AI-as-judge, evaluatiecriteria en pipeline |
+| 2 | h.6, h.9 | Context en RAG, retrieval, agents, inference en kosten |
+| 3 | h.6, h.5, h.3, h.10 | Planning, prompt-aanvallen, judge-bias, architectuur |
+| 4 | h.5, h.9, h.10 | Defensieve prompts, modeloptimalisatie, monitoring en feedback |
+| 5 | h.1, h.3, h.4, h.10 | Use-case, evaluatie, build-versus-buy, feedbackgrenzen |
+
+Elke week krijgt één reflectievraag. Je schrijft vijf regels en voegt die toe als
+bewijs (`--kind concept`). De gate controleert dat. De precieze pagina's staan
+in [docs/READING-MAP.md](docs/READING-MAP.md).
 
 ## De 24 weken
 
-### Fase 1 — Fundament: getypeerd, getest, gedeployed (week 1-6)
+### Fase 1 — Fundament: getypeerd, getest, gedeployed (week 1-6) + Huyen h.1-4
 
 | Week | Thema | Lezen | Bouwen | Gatebewijs |
 |---|---|---|---|---|
@@ -55,7 +78,7 @@ laatste fase meer tijd; plan die bewust in.
 **Fasepoort 1:** een live agent op de VPS met healthcheck, groene CI, smoke-test
 en een uitgevoerde rollback. Zonder deze poort start fase 2 niet.
 
-### Fase 2 — Kennis: retrieval, RAG en evaluatie (week 7-11)
+### Fase 2 — Kennis: retrieval, RAG en evaluatie (week 7-11) + Huyen h.6, h.9
 
 | Week | Thema | Lezen | Bouwen | Gatebewijs |
 |---|---|---|---|---|
@@ -68,7 +91,7 @@ en een uitgevoerde rollback. Zonder deze poort start fase 2 niet.
 **Fasepoort 2:** een gedeployde RAG-service met een geversioneerde golden set,
 eval-drempels in CI en een loadtestrapport.
 
-### Fase 3 — Orkestratie: multi-agent en optimalisatie (week 12-16)
+### Fase 3 — Orkestratie: multi-agent en optimalisatie (week 12-16) + Huyen h.5-6, h.3, h.10
 
 | Week | Thema | Lezen | Bouwen | Gatebewijs |
 |---|---|---|---|---|
@@ -81,7 +104,7 @@ eval-drempels in CI en een loadtestrapport.
 **Fasepoort 3:** een multi-agent systeem met trajectory-evaluaties en een
 cijfermatig bewezen verbetering tegen een baseline.
 
-### Fase 4 — Productie: security, schaal en betrouwbaarheid (week 17-20)
+### Fase 4 — Productie: security, schaal en betrouwbaarheid (week 17-20) + Huyen h.5, h.9-10
 
 | Week | Thema | Lezen | Bouwen | Gatebewijs |
 |---|---|---|---|---|
@@ -93,7 +116,7 @@ cijfermatig bewezen verbetering tegen een baseline.
 **Fasepoort 4:** een productie-review: securityrapport, SLO-dashboard, restore-
 en chaosbewijs en een postmortem met preventieve maatregelen.
 
-### Fase 5 — Capstone en carrière (week 21-24)
+### Fase 5 — Capstone en carrière (week 21-24) + Huyen h.1, h.3-4, h.10
 
 | Week | Thema | Lezen | Bouwen | Gatebewijs |
 |---|---|---|---|---|
@@ -143,6 +166,7 @@ expertise loopt daarna door:
 ## Start vandaag
 
 - [ ] `aae doctor` is groen (behalve optionele API-keys).
+- [ ] `aae start` gezet op de dag dat je echt begint.
 - [ ] `aae today` toont week 1.
 - [ ] De repo `agent-lab-01` bestaat en de eerste commit staat erin.
 - [ ] Je hebt 60 minuten in je agenda geblokkeerd, elke dag, op een vast uur.

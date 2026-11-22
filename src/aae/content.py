@@ -45,6 +45,7 @@ class Week:
     references: list[dict[str, str]] = field(default_factory=list)
     exam: dict[str, Any] = field(default_factory=dict)
     cards: list[dict[str, Any]] = field(default_factory=list)
+    concept: dict[str, Any] = field(default_factory=dict)
 
     @property
     def pass_score(self) -> float:
@@ -66,8 +67,38 @@ def _phase_files(root: Path) -> list[Path]:
     return files
 
 
+def _load_concepts(root: Path) -> dict[int, dict[str, Any]]:
+    path = root / "assessments" / "huyen-track.yaml"
+    if not path.exists():
+        return {}
+    data = yaml.safe_load(path.read_text(encoding="utf-8"))
+    if not isinstance(data, dict) or "weeks" not in data:
+        raise ContentError(f"{path.name}: verwacht een 'weeks'-lijst")
+    meta = {
+        "book": data.get("book", "AI Engineering"),
+        "author": data.get("author", "Chip Huyen"),
+        "edition": data.get("edition", ""),
+        "page_note": data.get("page_note", ""),
+    }
+    concepts: dict[int, dict[str, Any]] = {}
+    for raw in data["weeks"]:
+        number = int(raw["week"])
+        if number in concepts:
+            raise ContentError(f"Concept voor week {number} komt dubbel voor")
+        concepts[number] = {
+            **meta,
+            "ref": "huyen",
+            "chapters": str(raw.get("chapters", "")),
+            "pages": str(raw.get("pages", "")),
+            "focus": str(raw.get("focus", "")),
+            "prompt": str(raw.get("prompt", "")),
+        }
+    return concepts
+
+
 def load_all(root: Path | None = None) -> list[Week]:
     root = root or find_root()
+    concepts = _load_concepts(root)
     weeks: dict[int, Week] = {}
     for path in _phase_files(root):
         data = yaml.safe_load(path.read_text(encoding="utf-8"))
@@ -85,6 +116,7 @@ def load_all(root: Path | None = None) -> list[Week]:
                 references=list(raw.get("references", [])),
                 exam=dict(raw.get("exam", {})),
                 cards=list(raw.get("cards", [])),
+                concept=concepts.get(int(raw["week"]), {}),
             )
             if week.week in weeks:
                 raise ContentError(f"Week {week.week} komt dubbel voor")
@@ -121,6 +153,12 @@ def validate(root: Path | None = None) -> list[str]:
             for key in ("book", "ref", "pages"):
                 if not item.get(key):
                     errors.append(f"{label}: reading mist '{key}'")
+        if not week.concept:
+            errors.append(f"{label}: geen concept opgenomen in huyen-track.yaml")
+        else:
+            for key in ("chapters", "pages", "focus", "prompt"):
+                if not week.concept.get(key):
+                    errors.append(f"{label}: concept mist '{key}'")
         if not week.build.get("goal") or not week.build.get("deliverable"):
             errors.append(f"{label}: build.goal/build.deliverable ontbreekt")
         if not week.challenge.get("brief") or not week.challenge.get("acceptance"):

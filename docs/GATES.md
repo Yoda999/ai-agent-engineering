@@ -3,7 +3,7 @@
 Een gate is de enige manier om een week af te sluiten. De CLI berekent hem
 objectief; er is geen "ik voel me klaar".
 
-## Weeksgate: zes checks
+## Weeksgate: zeven checks
 
 | # | Check | Drempel | Hoe je hem haalt |
 |---|---|---|---|
@@ -12,9 +12,10 @@ objectief; er is geen "ik voel me klaar".
 | 3 | Challenge | geslaagde run | `aae challenge --week N --cmd ...` |
 | 4 | Kaarten | alle kaarten reps >= 2 en laatste score >= 2 | `aae cards --week N` |
 | 5 | Studietijd | 5 dagen >= 30 min in 7 dagen, samen >= 240 min | `aae log 60` |
-| 6 | Bewijs | >= 3 bewijsstukken | `aae evidence` of automatisch |
+| 6 | Conceptreflectie | 1 bewijsstuk van het type `concept` | `aae evidence --kind concept ...` |
+| 7 | Bewijs | >= 3 bewijsstukken | `aae evidence` of automatisch |
 
-Alle zes moeten groen zijn. `aae gate --week N` toont per check de status en
+Alle zeven moeten groen zijn. `aae gate --week N` toont per check de status en
 een concrete herstelopdracht.
 
 ### Examen
@@ -50,6 +51,14 @@ een concrete herstelopdracht.
 - Samen minstens 240 minuten (4 uur).
 - Eén sessie van 4 uur op zondag telt dus niet als 5 studiedagen; de gate meet
   consistentie, niet alleen volume.
+
+### Conceptreflectie
+
+- Eén keer per week beantwoord je de Huyen-reflectievraag in vijf regels.
+- Voeg het toe als bewijs: `aae evidence --week N --kind concept --ref "h.X: ..."`.
+- De gate telt alleen bewijs met `kind=concept`; een commit of test telt hier
+  niet voor.
+- Dit is geen samenvatting. Je moet een keuze, meting of trade-off uitleggen.
 
 ### Bewijs
 

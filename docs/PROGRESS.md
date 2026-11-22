@@ -1,14 +1,14 @@
 # Voortgang en bewijs
 
-Gegenereerd op 2026-11-12.
+Gegenereerd op 2026-11-13.
 
 ## Kerncijfers
 
 | Meting | Waarde |
 |---|---|
 | Huidige week | 1 / 24 |
-| Studietijd | 0 u 0 min |
-| Studiedagen | 0 |
+| Studietijd | 0 u 30 min |
+| Studiedagen | 1 |
 | Kaarten gezien | 0 |
 | Kaarten 'mature' (>= 21 dagen) | 0 |
 | Bewezen gates | 0 |
@@ -44,7 +44,9 @@ Gegenereerd op 2026-11-12.
 
 ## Bewijs (laatste 50)
 
-_Nog geen bewijs vastgelegd._
+| Week | Soort | Referentie | Datum |
+|---|---|---|---|
+| 1 | nulmeting | score 4/15 | 2026-11-13 |
 
 ## Volgende actie
 

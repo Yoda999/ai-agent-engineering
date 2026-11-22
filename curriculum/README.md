@@ -5,7 +5,10 @@ De inhoud staat in twee lagen:
 1. **`assessments/phase-*.yaml`** is de bron van waarheid: per week de
    leesopdracht, build, challenge, het examen en de kaarten. De CLI leest deze
    bestanden.
-2. **`phase-*.md`** is het narratief: waarom deze fase, de belangrijkste
+2. **`assessments/huyen-track.yaml`** is de concepttrack: per week een selectie
+   uit *AI Engineering* (Huyen) met een reflectievraag. De gate eist dat je die
+   reflectie als bewijs hebt toegevoegd.
+3. **`phase-*.md`** is het narratief: waarom deze fase, de belangrijkste
    concepten, veelgemaakte fouten, extra oefeningen en de fasepoort.
 
 | Fase | Weken | Narratief | Beoordeling |

@@ -7,6 +7,21 @@ Multi-agent systemen zijn geen automatisch betere systemen. Ze voegen
 coördinatie, kosten en faalmodi toe. Je leert wanneer je ze nodig hebt, hoe je
 ze deterministisch maakt en hoe je ze meet.
 
+## Conceptlaag: AI Engineering (Huyen)
+
+Huyen levert de concepten achter de orkestratie: agentpatronen en planning
+(h.6), prompt-aanvallen (h.5), judge-bias (h.3) en architectuur/guardrails
+(h.10). CrewAI en DSPy leveren de implementatie.
+
+- **Week 12-13:** agentpatronen en aanvalsoppervlak. Een tool is een
+  beveiligingsgrens, geen detail.
+- **Week 14-15:** architectuur en trajectbeoordeling. Guardrails horen in de
+  architectuur, niet alleen in de prompt.
+- **Week 16:** judge-bias en optimalisatie. Optimaliseer tegen een metric die je
+  vertrouwt.
+
+De reflectievraag per week is verplicht bewijs (`--kind concept`).
+
 ## Wat je na deze fase kunt
 
 - Rollen, taken en crews ontwerpen en de proceskeuze onderbouwen.
